@@ -1,1 +1,92 @@
 @import "tailwindcss";
+
+@theme {
+    --color-primary: #24572b;
+    --color-primary-container: #3d7041;
+    --color-background: #F5E6D2;
+    --color-surface: #F5E6D2;
+    --color-surface-white: #FFFFFF;
+    --color-surface-container: #edefe8;
+    --color-surface-container-high: #e7e9e2;
+    --color-surface-container-highest: #e1e3dd;
+    --color-accent-terracotta: #F07A26;
+    --color-accent-hover: #4E7A3C;
+    --color-on-surface: #191c18;
+    --color-on-surface-variant: #414940;
+    --color-outline-variant: #c1c9bd;
+
+
+    /* الألوان المخصصة من ملف السلة */
+    --color-primary: #24572b;
+    --color-accent-terracotta: #E06D2E;
+    --color-accent-hover: #C45A21;
+    --color-brand-orange: #F07A26;
+    --color-brand-green: #4E7A3C;
+    --color-background: #F5E6D2;
+    --color-surface-white: #FFFFFF;
+    --color-on-surface: #191c18;
+    --color-on-surface-variant: #414940;
+    --color-outline-variant: #c1c9bd;
+    --color-surface-container: #edefe8;
+    --color-surface-container-low: #f3f4ed;
+    --color-surface-container-high: #e7e9e2;
+
+
+    --font-headline-hero: Cairo, sans-serif;
+    --font-headline-lg: Cairo, sans-serif;
+    --font-body-md: Tajawal, Cairo, sans-serif;
+    --font-label-sm: Tajawal, Cairo, sans-serif;
+
+    /* قياسات الهوامش والمساحات المخصصة */
+    --spacing-section-lg: 80px;
+    --spacing-element-lg: 24px;
+    --spacing-element-md: 20px;
+    --spacing-element-sm: 16px;
+    --spacing-micro-md: 12px;
+    --spacing-micro-sm: 8px;
+    --spacing-micro-xs: 4px;
+
+
+}
+
+
+body {
+    font-family: 'Cairo', 'Tajawal', sans-serif;
+    background-color: #F5E6D2;
+    color: #191c18;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: 'Cairo', sans-serif;
+}
+
+.rustic-shadow {
+    box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+}
+
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* زر التحويم الموحد كما في CSS الأصلي */
+.btn-primary {
+    background-color: #F07A26;
+    color: #ffffff;
+    transition: all 250ms ease-in-out;
+}
+
+.btn-primary:hover {
+    background-color: #4E7A3C;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    transform: translateY(-2px);
+}
