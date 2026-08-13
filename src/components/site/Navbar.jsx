@@ -1,9 +1,11 @@
 
 import { useState } from 'react';
+import { useLanguage } from '../../context/LanguageContext';
 import { Link } from 'react-router-dom';
 
 export default function Navbar() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const {lang, setLang} = useLanguage();
 
     return (
         <>
@@ -32,10 +34,31 @@ export default function Navbar() {
                         {/* أدوات الهيدر */}
                         <div className="flex items-center gap-4">
                             <div className="flex items-center gap-2 border-x border-outline-variant/30 px-4">
-                                <button className="font-label-sm text-primary hover:text-accent-terracotta">EN</button>
+                                {/* زر اللغة الإنجليزية */}
+                                <button
+                                    onClick={() => setLang('en')}
+                                    className={`font-label-sm transition-colors ${lang === 'en'
+                                            ? 'text-accent-terracotta font-bold underline'
+                                            : 'text-primary hover:text-accent-terracotta'
+                                        }`}
+                                >
+                                    EN
+                                </button>
+
                                 <span className="text-outline-variant">|</span>
-                                <button className="font-label-sm text-accent-terracotta font-bold underline">AR</button>
+
+                                {/* زر اللغة العربية */}
+                                <button
+                                    onClick={() => setLang('ar')}
+                                    className={`font-label-sm transition-colors ${lang === 'ar'
+                                            ? 'text-accent-terracotta font-bold underline'
+                                            : 'text-primary hover:text-accent-terracotta'
+                                        }`}
+                                >
+                                    AR
+                                </button>
                             </div>
+
                             <div className="flex items-center gap-3">
                                 <Link to="/login" className="material-symbols-outlined text-primary hover:text-accent-terracotta transition-colors">person</Link>
                                 <div className="relative">

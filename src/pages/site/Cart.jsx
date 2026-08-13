@@ -1,58 +1,131 @@
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useLanguage } from '../../context/LanguageContext';
 import CartItem from '../../components/site/CartItem';
 import OrderSummary from '../../components/site/OrderSummary';
-
-const initialCartItems = [
-    {
-        id: 1,
-        title: "زعفران محلي فاخر",
-        weightLabel: "5 جرام",
-        price: 250,
-        qty: 1,
-        image: "https://lh3.googleusercontent.com/aida-public/AB6AXuBs3v6S0GAXzDwVLKwb6XLYoNwhTO3q_9erQrCrrWFrBTYxJDbC5eXRy3NrOFWy9uAJztOyh7oS71RwjlZncFIYiHLnMGbTucrmrqHiPFYHpNHMt_GSSaxbgD1L8E6R76A5gwJED8wMLXYkQMDuIUNy7FshsW13g3UbUTn0u1wGD-0pUDbPXVP3Plj0hphCUTXLIDIVMjzXy4yx4KEzrXtdX3Nb8v9BH-XFASu_ZLVU0M5eGLio-BYB"
-    },
-    {
-        id: 2,
-        title: "ثمار مجففة عضوية",
-        weightLabel: "500 جرام",
-        price: 170,
-        qty: 1,
-        image: "https://lh3.googleusercontent.com/aida-public/AB6AXuD9Got2q7slNNDa4ZgKHXdMszGJvr-ZhxxC2z-0kTQV-jVd7KP84ffXWC4v66E0z9O8b-6uM5GoChvh0oGNzLlIWTA8xCw1lWs0k1YB2ivu2IGV_Kt9S6c-kJ4MBOXCfX4OBAhfpghzkj96TEUw9EX2SAQ9P10G-Zq65WLmAGLbDNMpPS68DtVYzYTm37wyjb4pLnD2V0OLMnPsgcu7eNjZh2WHIk8ZzwjJL2P67Yr0TwvC71mqBtzK"
-    },
-    {
-        id: 3,
-        title: "مجموعة بهارات نجد",
-        weightLabel: "250 جرام",
-        price: 45,
-        qty: 1,
-        image: "https://lh3.googleusercontent.com/aida-public/AB6AXuDzDkahbWy2T9yfeNlPbBEnkKLNQk8Ro975do-nWFeBFzBZJ6liR0Z2CYzrRYAbbSKBz_kS5VOQBhjOZlMCLR2_6wshwk9-BoYkRwpxelpz4GQZl3wFU60hC4IPgFxMBpTO-BlHgaUfTgDbCnOnQh-rxtxkSR-U57sCEfKjRjb5HZyxeIOM6rgAs4KhXVLfoRxiAONi3OtSGb0UppvnEnFatO0K4jJw-4fpDpWFyb2xEx43uNo3yG2r"
-    }
-];
+import { cartService } from '../../services/cartService';
 
 export default function Cart() {
-    const [items, setItems] = useState(initialCartItems);
+    const { lang } = useLanguage();
+    const [cart, setCart] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [updatingId, setUpdatingId] = useState(null);
 
-    const handleDelete = (id) => {
-        setItems(items.filter(item => item.id !== id));
+    const fetchCart = async () => {
+        try {
+            setLoading(true);
+            const data = await cartService.getCart();
+            setCart(data);
+            setError(null);
+        } catch (err) {
+            console.error("خطأ جلب السلة:", err);
+            if (err.response?.status === 401) {
+                setError("يرجى تسجيل الدخول لعرض سلة التسوق.");
+            } else if (err.response?.status === 403) {
+                setError("ليس لديك الصلاحية للوصول للسلة.");
+            } else {
+                setError(err.response?.data?.message || "تعذر جلب بيانات السلة.");
+            }
+        } finally {
+            setLoading(false);
+        }
     };
 
+    useEffect(() => {
+        fetchCart();
+    }, [lang]);
+
+    // دالة التعامل مع تفريغ السلة
+    const handleClearCart = async () => {
+        if (!window.confirm("هل أنت متأكد من رغبتك في تفريغ السلة بالكامل؟")) {
+            return;
+        }
+
+        try {
+            await cartService.clearCart();
+            // إعادة تحديث بيانات السلة
+            fetchCart();
+        } catch (err) {
+            console.error("خطأ في تفريغ السلة:", err);
+            alert("حدث خطأ أثناء تفريغ السلة.");
+        }
+    };
+
+    const handleUpdateQty = async (itemId, currentQty, delta) => {
+        const newQty = currentQty + delta;
+        if (newQty < 1) return;
+
+        try {
+            setUpdatingId(itemId);
+            const updatedCart = await cartService.updateQuantity(itemId, newQty);
+            setCart(updatedCart);
+        } catch (err) {
+            alert(err.response?.data?.message || "فشل تحديث الكمية (قد تكون تجاوزت المخزون المتاح).");
+        } finally {
+            setUpdatingId(null);
+        }
+    };
+
+    const handleDelete = async (itemId) => {
+        if (!window.confirm("هل أنت متأكد من حذف هذا المنتج من السلة؟")) return;
+
+        try {
+            setUpdatingId(itemId);
+            await cartService.removeItem(itemId);
+            await fetchCart();
+        } catch (err) {
+            alert(err.response?.data?.message || "فشل حذف المنتج من السلة.");
+        } finally {
+            setUpdatingId(null);
+        }
+    };
+
+    if (loading) {
+        return (
+            <div className="py-20 text-center text-primary font-bold">
+                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary mx-auto mb-4"></div>
+                جاري تحميل السلة...
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="max-w-xl mx-auto my-12 p-6 bg-red-50 border-r-4 border-red-500 text-red-700 rounded-2xl text-center">
+                <p className="font-bold mb-2">{error}</p>
+                <a href="/login" className="text-sm font-bold text-accent-terracotta underline">
+                    الانتقال لصفحة تسجيل الدخول
+                </a>
+            </div>
+        );
+    }
+
+    const items = cart?.items || [];
+
     return (
-        <div className="pt-8 pb-section-lg px-4 md:px-element-lg max-w-7xl mx-auto w-full">
-            {/* العناوين والعدد */}
+        <div className="pt-8 pb-section-lg px-4 md:px-element-lg max-w-7xl mx-auto w-full" dir="rtl">
             <div className="mb-element-lg mt-micro-md text-center md:text-right">
                 <h1 className="text-headline-hero font-bold text-on-surface mb-micro-xs">سلة التسوق</h1>
                 <p className="text-body-md text-on-surface-variant">
-                    لديك ({items.length}) منتجات في السلة
+                    لديك ({cart?.items_count || 0}) منتجات في السلة
                 </p>
+
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-element-lg items-start">
-                {/* قائمة المنتجات */}
                 <div className="lg:col-span-8 space-y-element-md">
                     {items.length > 0 ? (
                         items.map(item => (
-                            <CartItem key={item.id} item={item} onDelete={handleDelete} />
+                            <CartItem
+                                key={item.id}
+                                item={item}
+                                onDelete={handleDelete}
+                                onUpdateQty={handleUpdateQty}
+                                isUpdating={updatingId === item.id}
+                                cartItems={cart?.items}
+                                onClearCart={handleClearCart}
+                            />
                         ))
                     ) : (
                         <div className="flex flex-col items-center justify-center py-section-lg text-center bg-surface-white rounded-xl shadow-sm">
@@ -63,8 +136,14 @@ export default function Cart() {
                     )}
                 </div>
 
-                {/* الشريط الجانبي للطلب والدفع */}
-                <OrderSummary />
+                <OrderSummary
+                    user={cart?.user}
+                    totalQuantity={cart?.total_quantity || 0}
+                    subtotal={cart?.subtotal || 0}
+                    shippingFee={cart?.shipping_fee || 0}
+                    grandTotal={cart?.grand_total || 0}
+                    itemsCount={cart?.items_count || 0}
+                />
             </div>
         </div>
     );
