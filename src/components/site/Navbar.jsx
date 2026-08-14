@@ -1,12 +1,13 @@
 
 import { useState } from 'react';
-import { useLanguage } from '../../context/LanguageContext';
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-
+import { useCart } from '../../context/CartContext';
 export default function Navbar() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-    const {lang, setLang} = useLanguage();
-
+    const { i18n } = useTranslation();
+    const currentLang = i18n.language?.startsWith('en') ? 'en' : 'ar';
+    const { cartCount } = useCart();
     return (
         <>
             <nav className="bg-white/90 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-outline-variant/20">
@@ -36,10 +37,11 @@ export default function Navbar() {
                             <div className="flex items-center gap-2 border-x border-outline-variant/30 px-4">
                                 {/* زر اللغة الإنجليزية */}
                                 <button
-                                    onClick={() => setLang('en')}
-                                    className={`font-label-sm transition-colors ${lang === 'en'
-                                            ? 'text-accent-terracotta font-bold underline'
-                                            : 'text-primary hover:text-accent-terracotta'
+                                    type="button"
+                                    onClick={() => i18n.changeLanguage("en")}
+                                    className={`font-label-sm transition-colors ${currentLang === 'en'
+                                        ? 'text-accent-terracotta font-bold underline'
+                                        : 'text-primary hover:text-accent-terracotta'
                                         }`}
                                 >
                                     EN
@@ -49,22 +51,33 @@ export default function Navbar() {
 
                                 {/* زر اللغة العربية */}
                                 <button
-                                    onClick={() => setLang('ar')}
-                                    className={`font-label-sm transition-colors ${lang === 'ar'
-                                            ? 'text-accent-terracotta font-bold underline'
-                                            : 'text-primary hover:text-accent-terracotta'
+                                    type="button"
+                                    onClick={() => i18n.changeLanguage("ar")}
+                                    className={`font-label-sm transition-colors ${currentLang === 'ar'
+                                        ? 'text-accent-terracotta font-bold underline'
+                                        : 'text-primary hover:text-accent-terracotta'
                                         }`}
                                 >
                                     AR
                                 </button>
                             </div>
 
+
                             <div className="flex items-center gap-3">
                                 <Link to="/login" className="material-symbols-outlined text-primary hover:text-accent-terracotta transition-colors">person</Link>
+
                                 <div className="relative">
-                                    <Link to="/cart" className="material-symbols-outlined text-primary hover:text-accent-terracotta transition-colors">shopping_cart</Link>
-                                    <span className="absolute -top-1.5 -right-1.5 bg-accent-terracotta text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full font-bold">3</span>
+                                    <Link to="/cart" className="material-symbols-outlined text-primary">shopping_cart</Link>
+
+                                    {cartCount > 0 && (
+                                        <span className="absolute -top-1.5 -right-1.5 bg-accent-terracotta text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full font-bold">
+                                            {cartCount > 99 ? '99+' : cartCount}
+                                        </span>
+                                    )}
+
                                 </div>
+
+
                                 {/* زر القائمة - يظهر فقط في الشاشات الصغيرة lg:hidden */}
                                 <button
                                     type="button"
@@ -75,6 +88,7 @@ export default function Navbar() {
                                 </button>
                             </div>
                         </div>
+
                     </div>
                 </div>
             </nav>

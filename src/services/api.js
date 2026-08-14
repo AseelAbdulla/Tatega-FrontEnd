@@ -1,6 +1,7 @@
 // src/services/api.js
 import axios from 'axios';
 import { API_BASE_URL } from '../config/env';
+import i18n from '../i18n';
 
 // إنشاء نسخة مخصصة من Axios
 const api = axios.create({
@@ -21,8 +22,7 @@ api.interceptors.request.use((config) => {
 
 // إرفاق هيدر اللغة التلقائي قبل كل طلب
 api.interceptors.request.use((config) => {
-    const currentLang = localStorage.getItem('app_lang') || 'ar';
-    config.headers['Accept-Language'] = currentLang;
+    config.headers['Accept-Language'] = i18n.language || 'ar';
     return config;
 
 
