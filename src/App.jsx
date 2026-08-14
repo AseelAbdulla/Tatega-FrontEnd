@@ -1,15 +1,15 @@
 
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { LanguageProvider } from './context/LanguageContext';
 import SiteLayout from './layouts/SiteLayout';
 import Home from './pages/site/Home';
 import Cart from './pages/site/Cart';
 import OrderSuccess from './pages/site/OrderSuccess';
+import { CartProvider } from './context/CartContext';
 
 export default function App() {
   return (
+        <CartProvider>
     <Router>
-      <LanguageProvider>
         <Routes>
         <Route element={<SiteLayout />}>
           <Route path="/" element={<Home />} />
@@ -17,7 +17,7 @@ export default function App() {
           <Route path="/OrderSuccess" element={<OrderSuccess />} />
         </Route>
         </Routes>
-      </LanguageProvider>
     </Router>
+    </CartProvider>
   );
 }

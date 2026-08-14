@@ -1,55 +1,118 @@
-export default function OrderItemsDetails() {
-    const items = [
-        {
-            id: 1,
-            title: "هيل أخضر هندي فاخر",
-            qty: 2,
-            price: "145 ر.س",
-            image: "https://lh3.googleusercontent.com/aida-public/AB6AXuA1Vk9-QvtJCiXvk1kxomjwNi3aEnX0PXEv5j9VdMhrLxFNDr4WBZ0MaKtnQdt5okh_uzRQKI4okyVX5PnpWYArJhGk4R-ISIBh3fG99sdcL6md88rEJO2PbzG5XsTFy-AdtCqucOmXbF_e7yMr65RrM4iusGr2su8LpGw4-5of5x4ce2IsXT6cuy5f1GXfqyYtoAz__aKih6zu1eXUyO17yr3znSU0aqJi26J3N-ej71e-kCkykU1o"
-        },
-        {
-            id: 2,
-            title: "كركم عضوي مطحون",
-            qty: 1,
-            price: "42 ر.س",
-            image: "https://lh3.googleusercontent.com/aida-public/AB6AXuBG4ReoJ6N0zwz-uE-W2f6uQDETzPOJLriVAPCF-gd9xAdLtJb9tEfug8zazwioft1_GNMmAgwoaqlmbpBdQqMHYbXLD3nvNO78WFlJLdCfJEUPT3ap691GSuwB1RpMcqf3mRQ93JWXI5SdrNX2rqNo6z-lDZJ1S8KmQ2HGxFpJPYFE0UzTpxkIIoAguBRjpq6riw9l7TQStJ3cS4pktsotcxDXvfRwS3JEEP2zgTjwFxk71PrJRVfE"
-        }
-    ];
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+// 1️⃣ استيراد دالة الترجمة المخصصة من الملف المنفصل
+import { getLocalizedText } from '../../utils/localize';
+
+export default function OrderItemsDetails({ items = [], pricing = {} }) {
+    // 2️⃣ استخدام i18next للترجمة التلقائية مع معرفة اللغة الحالية
+    const { t, i18n } = useTranslation();
+    const currentLang = i18n.language || 'ar';
+    const locale = currentLang === 'en' ? 'en-US' : 'ar-SA';
+
+    // دالة استخراج اسم المنتج مع الاعتماد على الملف المنفصل مع fallback مناسب
+    const getProductName = (product) => {
+        if (!product) return t('order.product_default', 'منتج');
+        const target = product.product || product;
+        
+        return getLocalizedText(target.name || target.title)
+            || (currentLang === 'en' ? target.name_en : target.name_ar)
+            || target.name 
+            || t('order.product_default', 'منتج');
+    };
+
+    // استخراج قيمة التوصيل
+    const shippingFee = Number(pricing.shipping_fee || pricing.shipping || 0);
 
     return (
-        <div className="md:col-span-2 bg-white rounded-xl p-6 md:p-8 rustic-shadow border border-black/5">
-            <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
-                <span className="material-symbols-outlined text-primary">shopping_bag</span>
-                <span>تفاصيل المنتجات</span>
-            </h3>
+        <div className="md:col-span-2 space-y-6" dir={currentLang === 'ar' ? 'rtl' : 'ltr'}>
+            {/* كارت قائمة المنتجات */}
+            <div className="bg-white rounded-xl p-6 rustic-shadow border border-black/5">
+                <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-primary">
+                    <span className="material-symbols-outlined">shopping_bag</span>
+                    <span>{t('order.selected_products', 'المنتجات المحددة')}</span>
+                </h3>
 
-            <div className="space-y-6">
-                {items.map((item) => (
-                    <div key={item.id} className="flex flex-col sm:flex-row items-center gap-4 border-b border-black/5 pb-6">
-                        <img alt={item.title} className="w-20 h-20 rounded-lg object-cover bg-background" src={item.image} />
-                        <div className="grow text-center sm:text-right">
-                            <h4 className="font-bold">{item.title}</h4>
-                            <p className="text-sm text-on-surface-variant mt-1">الكمية: {item.qty} وحدة</p>
-                        </div>
-                        <div className="font-bold text-accent-terracotta text-lg">{item.price}</div>
-                    </div>
-                ))}
+                <div className="divide-y divide-gray-100">
+                    {items && items.length > 0 ? (
+                        items.map((item, index) => {
+                            const qty = Number(item.quantity || item.qty || 1);
+                            const price = Number(item.unit_price || item.price || 0);
+                            const total = qty * price;
+
+                            return (
+                                <div key={item.id || index} className="py-3 flex items-center justify-between gap-4">
+                                    <div className="flex items-center gap-3">
+                                        <img 
+                                            src={item.product?.image || item.image || '/placeholder.png'} 
+                                            alt={getProductName(item)} 
+                                            className="w-14 h-14 object-cover rounded-lg border border-gray-100"
+                                        />
+                                        <div>
+                                            {/* اسم المنتج المترجم تلقائياً من قاعدة البيانات */}
+                                            <h4 className="font-semibold text-sm text-on-surface">
+                                                {getProductName(item)}
+                                            </h4>
+                                            <p className="text-xs text-on-surface-variant mt-0.5">
+                                                {t('cart.quantity', 'الكمية')}: {qty} × {price.toLocaleString(locale)} {t('common.currency', 'ر.ي')}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <span className="font-bold text-sm text-on-surface">
+                                        {total.toLocaleString(locale)} {t('common.currency', 'ر.ي')}
+                                    </span>
+                                </div>
+                            );
+                        })
+                    ) : (
+                        <p className="text-sm text-on-surface-variant py-2">
+                            {t('order.no_items_found', 'لا توجد تفاصيل للمنتجات.')}
+                        </p>
+                    )}
+                </div>
             </div>
 
-            <div className="mt-8 pt-6 space-y-3 border-t-2 border-dashed border-black/10">
-                <div className="flex justify-between text-on-surface-variant text-sm">
-                    <span>المجموع الفرعي</span>
-                    <span>187 ر.س</span>
+            {/* كارت ملخص الفاتورة */}
+            <div className="bg-white rounded-xl p-6 rustic-shadow border border-black/5 space-y-3">
+                <h3 className="text-lg font-bold mb-3 text-primary">
+                    {t('order.summary_title', 'ملخص الحساب')}
+                </h3>
+                
+                <div className="flex justify-between text-sm text-on-surface-variant">
+                    <span>{t('order.subtotal', 'المجموع الفرعي:')}</span>
+                    <span className="font-semibold">
+                        {(pricing.subtotal || 0).toLocaleString(locale)} {t('common.currency', 'ر.ي')}
+                    </span>
                 </div>
-                <div className="flex justify-between text-on-surface-variant text-sm">
-                    <span>التوصيل</span>
-                    <span className="text-primary font-bold">مجاني</span>
+
+                {Number(pricing.discount) > 0 && (
+                    <div className="flex justify-between text-sm text-green-600">
+                        <span>{t('order.discount', 'الخصم:')}</span>
+                        <span className="font-semibold">
+                            -{(pricing.discount).toLocaleString(locale)} {t('common.currency', 'ر.ي')}
+                        </span>
+                    </div>
+                )}
+
+                {/* رسوم التوصيل */}
+                <div className="flex justify-between text-sm text-on-surface-variant">
+                    <span>{t('order.delivery_fee', 'رسوم التوصيل:')}</span>
+                    <span className="font-semibold">
+                        {shippingFee > 0 
+                            ? `${shippingFee.toLocaleString(locale)} ${t('common.currency', 'ر.ي')}` 
+                            : t('order.free_shipping', 'مجاني')}
+                    </span>
                 </div>
-                <div className="flex justify-between text-xl font-bold text-primary pt-3">
-                    <span>الإجمالي</span>
-                    <span>187 ر.س</span>
+
+                <hr className="my-2 border-gray-100" />
+
+                <div className="flex justify-between text-base font-bold text-on-surface">
+                    <span>{t('order.grand_total', 'الإجمالي الكلي:')}</span>
+                    <span className="text-accent-terracotta">
+                        {(pricing.total || 0).toLocaleString(locale)} {t('common.currency', 'ر.ي')}
+                    </span>
                 </div>
             </div>
         </div>
     );
 }
+
