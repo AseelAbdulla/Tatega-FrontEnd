@@ -1,53 +1,110 @@
-export default function OrderTracker() {
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+
+export default function OrderTracker({ currentStatus = '' }) {
+    const { t } = useTranslation();
+
+    // 1️⃣ تنظيف الحالة وتحويلها لحروف صغيرة
+    const rawStatus = String(currentStatus || '').trim().toLowerCase();
+
+    // 2️⃣ معالجة حالات الإلغاء والرفض المباشرة من الـ Enum (canceled / rejected)
+    if (['canceled', 'cancelled', 'rejected', 'ملغي', 'مرفوض'].includes(rawStatus)) {
+        return (
+            <div className="w-full my-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center justify-center gap-3 text-red-600">
+                <span className="material-symbols-outlined text-2xl">cancel</span>
+                <span className="font-bold text-sm md:text-base">
+                    {t('order.status_canceled', 'تم إلغاء هذا الطلب أو رفضه')}
+                </span>
+            </div>
+        );
+    }
+
+    // 3️⃣ ربط قيم الـ Enum بـ المفاتيح الأساسية لشريط التتبع
+    const normalizeStatus = (status) => {
+        switch (status) {
+            // حالة الانتظار / طلب جديد
+            case 'pending':
+            case 'new':
+                return 'pending';
+
+            // حالة القبول والتجهيز (شاملة accepted المرجعة من الباك إند)
+            case 'accepted':
+            case 'processing':
+            case 'preparing':
+            case 'in_progress':
+                return 'processing';
+
+            // حالة الشحن والتوصيل
+            case 'shipped':
+            case 'delivering':
+            case 'on_way':
+                return 'shipped';
+
+            // حالة مكتمل / تم التسليم
+            case 'completed':
+            case 'delivered':
+                return 'delivered';
+
+            default:
+                return 'pending';
+        }
+    };
+
+    const activeKey = normalizeStatus(rawStatus);
+
+    // 4️⃣ خطوات التتبع الـ 4 الأساسية
+    const steps = [
+        { key: 'pending', label: t('order.status_pending', 'قيد الانتظار'), icon: 'hourglass_top' },
+        { key: 'processing', label: t('order.status_processing', 'تم القبول والجاري التجهيز'), icon: 'inventory' },
+        { key: 'shipped', label: t('order.status_shipped', 'تم الشحن'), icon: 'local_shipping' },
+        { key: 'delivered', label: t('order.status_delivered', 'تم التسليم'), icon: 'check_circle' },
+    ];
+
+    // تحديد الفهرس (Index)
+    const currentStepIndex = steps.findIndex(step => step.key === activeKey);
+    console.log("🔴 القيمة الواصلة داخل المكون OrderTracker هي:", currentStatus);
     return (
-        <section className="mb-12">
-            {/* تتبع الشاشات الكبيرة (Desktop Stepper) */}
-            <div className="hidden md:flex relative justify-between mb-8">
-                <div className="absolute top-[20px] h-0.5 bg-surface-container-highest w-full z-0"></div>
-                <div className="absolute top-[20px] h-0.5 bg-primary w-[33%] right-0 z-0"></div>
+        <div className="flex items-center justify-between w-full my-6">
+            {steps.map((step, index) => {
+                const isPassedOrCurrent = index <= currentStepIndex;
+                const isCurrent = index === currentStepIndex;
 
-                {/* خطوة 1: تم استلام الطلب */}
-                <div className="relative z-10 flex flex-col items-center gap-2">
-                    <div className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center shadow-lg">
-                        <span className="material-symbols-outlined">check</span>
-                    </div>
-                    <span className="text-sm font-medium">تم استلام الطلب</span>
-                </div>
-
-                {/* خطوة 2: في الطريق إليك */}
-                <div className="relative z-10 flex flex-col items-center gap-2 opacity-40">
-                    <div className="w-10 h-10 rounded-full bg-white text-on-surface-variant flex items-center justify-center border border-outline-variant">
-                        <span className="material-symbols-outlined">local_shipping</span>
-                    </div>
-                    <span className="text-sm font-medium">في الطريق إليك</span>
-                </div>
-            </div>
-
-            {/* تتبع الشاشات الصغيرة (Mobile Stepper) */}
-            <div className="flex flex-col md:hidden space-y-6">
-                <div className="flex items-start gap-4 relative">
-                    <div className="flex flex-col items-center">
-                        <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center shadow-md relative z-10">
-                            <span className="material-symbols-outlined text-[18px]">check</span>
+                return (
+                    <React.Fragment key={step.key}>
+                        {/* الأيقونة والنص */}
+                        <div className="flex flex-col items-center relative z-10">
+                            <div
+                                className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
+                                    isPassedOrCurrent
+                                        ? 'bg-brand-green text-white shadow-md'
+                                        : 'bg-gray-200 text-gray-400'
+                                } ${isCurrent ? 'ring-4 ring-brand-green/20 scale-110' : ''}`}
+                            >
+                                <span className="material-symbols-outlined text-xl">
+                                    {step.icon}
+                                </span>
+                            </div>
+                            <span
+                                className={`text-xs mt-2 font-bold transition-colors ${
+                                    isPassedOrCurrent ? 'text-brand-green' : 'text-gray-400'
+                                }`}
+                            >
+                                {step.label}
+                            </span>
                         </div>
-                        <div className="w-0.5 h-12 bg-primary mt-2"></div>
-                    </div>
-                    <div className="pt-1">
-                        <span className="text-lg font-bold block">تم استلام الطلب</span>
-                        <span className="text-sm text-on-surface-variant">12:30 PM, اليوم</span>
-                    </div>
-                </div>
 
-                <div className="flex items-start gap-4 opacity-40">
-                    <div className="w-8 h-8 rounded-full bg-white border border-outline-variant text-on-surface-variant flex items-center justify-center">
-                        <span className="material-symbols-outlined text-[18px]">local_shipping</span>
-                    </div>
-                    <div className="pt-1">
-                        <span className="text-lg font-bold block">في الطريق إليك</span>
-                        <span className="text-sm text-on-surface-variant">متوقع قريباً</span>
-                    </div>
-                </div>
-            </div>
-        </section>
+                        {/* الخط الواصل */}
+                        {index < steps.length - 1 && (
+                            <div
+                                className={`flex-1 h-1 transition-all duration-500 mx-2 ${
+                                    index < currentStepIndex ? 'bg-brand-green' : 'bg-gray-200'
+                                }`}
+                            />
+                        )}
+                    </React.Fragment>
+                );
+            })}
+        </div>
     );
 }
+

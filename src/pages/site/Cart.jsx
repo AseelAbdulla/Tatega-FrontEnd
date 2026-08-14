@@ -1,12 +1,14 @@
 
 import { useEffect, useState } from 'react';
-import { useLanguage } from '../../context/LanguageContext';
+import { useTranslation } from 'react-i18next';
 import CartItem from '../../components/site/CartItem';
 import OrderSummary from '../../components/site/OrderSummary';
 import { cartService } from '../../services/cartService';
 
 export default function Cart() {
-    const { lang } = useLanguage();
+    const { i18n } = useTranslation();
+    const currentLang = i18n.language || 'ar';
+
     const [cart, setCart] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -34,7 +36,7 @@ export default function Cart() {
 
     useEffect(() => {
         fetchCart();
-    }, [lang]);
+    }, [i18n.language]);
 
     // دالة التعامل مع تفريغ السلة
     const handleClearCart = async () => {
