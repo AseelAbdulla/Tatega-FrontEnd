@@ -1,88 +1,179 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+
 import {
     MapContainer,
     TileLayer,
     CircleMarker,
     Popup,
-    Tooltip,
-    useMap
+    useMap,
 } from "react-leaflet";
-import L from 'leaflet';
-import { partnerService } from '../../services/partnerService';
 
-// إصلاح مشكلة أيقونات Leaflet الافتراضية
-import markerIconPng from 'leaflet/dist/images/marker-icon.png';
-import markerShadowPng from 'leaflet/dist/images/marker-shadow.png';
+import { partnerService } from "../../services/partnerService";
 
-const customIcon = new L.Icon({
-    iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-    shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-});
 // مكون مساعد لإعادة توجيه كاميرا الخريطة نحو الفرع المحدد
 function ChangeMapView({ coords }) {
     const map = useMap();
+
     map.setView(coords, 13);
+
     return null;
 }
 
 export default function StoreLocator() {
+    const { t, i18n } = useTranslation();
+
     const [partners, setPartners] = useState([]);
     const [selectedPartner, setSelectedPartner] = useState(null);
     const [loading, setLoading] = useState(true);
 
+    /*
+    |--------------------------------------------------------------------------
+    | Get Partners
+    |--------------------------------------------------------------------------
+    */
+
     useEffect(() => {
-        partnerService.getPublicPartners()
+        partnerService
+            .getPublicPartners()
             .then((data) => {
-                // تصفية العناصر التي تحتوي على إحداثيات صحيحة فقط
-                const validPartners = data.filter(p => p.lat && p.lng);
+                // تصفية الفروع التي تحتوي على إحداثيات صحيحة فقط
+                const validPartners = data.filter(
+                    (partner) => partner.lat && partner.lng
+                );
+
                 setPartners(validPartners);
+
                 if (validPartners.length > 0) {
-                    setSelectedPartner(validPartners[0]); // اختيار أول فرع افتراضياً
+                    setSelectedPartner(validPartners[0]);
                 }
             })
-            .catch((err) => console.error("خطأ في جلب الفروع:", err))
-            .finally(() => setLoading(false));
+            .catch((err) => {
+                console.error("Error fetching partners:", err);
+            })
+            .finally(() => {
+                setLoading(false);
+            });
     }, []);
 
-    // دالة مساعدة لقراءة اسم الفرع من حقل الـ name الخاضع لـ array cast
+    /*
+    |--------------------------------------------------------------------------
+    | Get Localized Partner Name
+    |--------------------------------------------------------------------------
+    */
+
     const getPartnerName = (name) => {
-        if (!name) return 'فرع تعتيقة';
-        if (typeof name === 'string') return name;
-        if (typeof name === 'object') return name.ar || name.en || Object.values(name)[0] || 'فرع تعتيقة';
-        return 'فرع تعتيقة';
+        if (!name) {
+            return t("storeLocator.defaultBranch");
+        }
+
+        const currentLang = i18n.language?.startsWith("en")
+            ? "en"
+            : "ar";
+
+        // إذا كان الاسم Object
+        if (typeof name === "object") {
+            return (
+                name[currentLang] ||
+                name.ar ||
+                name.en ||
+                t("storeLocator.defaultBranch")
+            );
+        }
+
+        // إذا كان الاسم String
+        if (typeof name === "string") {
+            // محاولة قراءة JSON
+            try {
+                const parsed = JSON.parse(name);
+
+                if (parsed && typeof parsed === "object") {
+                    return (
+                        parsed[currentLang] ||
+                        parsed.ar ||
+                        parsed.en ||
+                        t("storeLocator.defaultBranch")
+                    );
+                }
+            } catch {
+                // إذا لم يكن JSON، نستخدم النص كما هو
+                return name;
+            }
+
+            return name;
+        }
+
+        return t("storeLocator.defaultBranch");
     };
 
-    // مركز الخريطة الافتراضي
+    /*
+    |--------------------------------------------------------------------------
+    | Default Map Position
+    |--------------------------------------------------------------------------
+    */
+
     const defaultPosition = selectedPartner
-        ? [parseFloat(selectedPartner.lat), parseFloat(selectedPartner.lng)]
-        : [24.7136, 46.6753]; // إحداثيات افتراضية
+        ? [
+              parseFloat(selectedPartner.lat),
+              parseFloat(selectedPartner.lng),
+          ]
+        : [24.7136, 46.6753];
+
+    /*
+    |--------------------------------------------------------------------------
+    | Loading
+    |--------------------------------------------------------------------------
+    */
 
     if (loading) {
         return (
             <div className="py-16 text-center text-primary font-bold">
-                جاري جلب الفروع ونقاط البيع...
+                {t("storeLocator.loading")}
             </div>
         );
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | Render
+    |--------------------------------------------------------------------------
+    */
+
     return (
-        <section className="py-16 bg-surface-container/50" id="parteners">
+        <section
+            className="py-16 bg-surface-container/50"
+            id="parteners"
+        >
             <div className="px-4 md:px-16 max-w-7xl mx-auto">
+
+                {/* Section Heading */}
+
                 <div className="text-center mb-12">
+
                     <span className="text-accent-terracotta font-bold text-xs mb-4 block uppercase">
-                        تواصل معنا مكانياً
+                        {t("storeLocator.label")}
                     </span>
-                    <h2 className="text-3xl font-bold text-primary mb-6">ابحث عن جذورنا وفروعنا</h2>
+
+                    <h2 className="text-3xl font-bold text-primary mb-6">
+                        {t("storeLocator.title")}
+                    </h2>
+
                 </div>
 
-                {/* الحاوية الأب الرئيسية - يجب أن تكون relative */}
-                <div className="relative rounded-[3rem] overflow-hidden rustic-shadow border border-black/10 z-0" style={{ height: '500px', width: '100%' }}>
+                {/* Map Container */}
 
-                    {/* 1. الخريطة (تحتوي فقط على مكونات Leaflet) */}
+                <div
+                    className="relative rounded-[3rem] overflow-hidden rustic-shadow border border-black/10 z-0"
+                    style={{
+                        height: "500px",
+                        width: "100%",
+                    }}
+                >
+
+                    {/* Leaflet Map */}
+
                     <MapContainer
-                        center={[15, 40]}
+                        center={defaultPosition}
                         zoom={3}
                         minZoom={2}
                         maxZoom={6}
@@ -94,59 +185,100 @@ export default function StoreLocator() {
                             borderRadius: "10px",
                         }}
                     >
+
                         <TileLayer
                             attribution="© OpenStreetMap"
                             url="https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png"
                         />
 
                         {selectedPartner && (
-                            <ChangeMapView coords={[parseFloat(selectedPartner.lat), parseFloat(selectedPartner.lng)]} />
+                            <ChangeMapView
+                                coords={[
+                                    parseFloat(selectedPartner.lat),
+                                    parseFloat(selectedPartner.lng),
+                                ]}
+                            />
                         )}
 
+                        {/* Partner Markers */}
 
-                        {/* 2. استبدال Marker بـ CircleMarker وتنسيقه بألوان الهوية */}
                         {partners.map((partner) => {
-                            const isSelected = selectedPartner?.id === partner.id;
+                            const isSelected =
+                                selectedPartner?.id === partner.id;
 
                             return (
                                 <CircleMarker
                                     key={partner.id}
-                                    center={[parseFloat(partner.lat), parseFloat(partner.lng)]}
-                                    radius={isSelected ? 10 : 6} // نصف القطر بالبكسل (يكبر عند التحديد)
+                                    center={[
+                                        parseFloat(partner.lat),
+                                        parseFloat(partner.lng),
+                                    ]}
+                                    radius={isSelected ? 10 : 6}
                                     pathOptions={{
-                                        color: isSelected ? '#F07A26' : '#24572b',       // لون الإطار الخارجي (برتقالي إذا محدد / أخضر للملف العام)
-                                        fillColor: isSelected ? '#F07A26' : '#24572b',   // لون التعبئة الداخلية
-                                        fillOpacity: isSelected ? 0.9 : 0.6,             // درجة الشفافية
-                                        weight: isSelected ? 2 : 1                       // سمك الإطار الخارجي
+                                        color: isSelected
+                                            ? "#F07A26"
+                                            : "#24572b",
+
+                                        fillColor: isSelected
+                                            ? "#F07A26"
+                                            : "#24572b",
+
+                                        fillOpacity: isSelected
+                                            ? 0.9
+                                            : 0.6,
+
+                                        weight: isSelected ? 2 : 1,
                                     }}
                                     eventHandlers={{
-                                        click: () => setSelectedPartner(partner)
+                                        click: () =>
+                                            setSelectedPartner(partner),
                                     }}
                                 >
+
+                                    {/* Popup */}
+
                                     <Popup>
                                         <div className="text-right p-1">
-                                            <h4 className="font-bold text-primary">{getPartnerName(partner.name)}</h4>
+
+                                            <h4 className="font-bold text-primary">
+                                                {getPartnerName(
+                                                    partner.name
+                                                )}
+                                            </h4>
+
                                             {partner.website_url && (
                                                 <a
-                                                    href={partner.website_url}
+                                                    href={
+                                                        partner.website_url
+                                                    }
                                                     target="_blank"
                                                     rel="noreferrer"
                                                     className="text-xs text-accent-terracotta underline block mt-1"
                                                 >
-                                                    زيارة الموقع
+                                                    {t(
+                                                        "storeLocator.visitWebsite"
+                                                    )}
                                                 </a>
                                             )}
+
                                         </div>
                                     </Popup>
+
                                 </CircleMarker>
                             );
                         })}
+
                     </MapContainer>
 
-                    {/* 2. الكارت العائم (خارج MapContainer وتحت تأثير absolute للبُعد الرئيسي) */}
+                    {/* Floating Partner Card */}
+
                     {selectedPartner && (
-                        <div className="absolute top-10 right-10 z-1000 w-full max-w-xs pointer-events-auto">
+                        <div className="absolute top-10 right-10 z-[1000] w-full max-w-xs pointer-events-auto">
+
                             <div className="bg-white/90 backdrop-blur-md p-8 rounded-3xl border border-white/50 shadow-2xl">
+
+                                {/* Partner Logo */}
+
                                 {selectedPartner.logo && (
                                     <img
                                         src={selectedPartner.logo}
@@ -154,16 +286,39 @@ export default function StoreLocator() {
                                         className="w-16 h-16 object-contain mb-4 rounded-lg bg-background p-1"
                                     />
                                 )}
+
+                                {/* Partner Name */}
+
                                 <h4 className="font-bold text-primary text-lg mb-2">
-                                    {getPartnerName(selectedPartner.name)}
+                                    {getPartnerName(
+                                        selectedPartner.name
+                                    )}
                                 </h4>
 
+                                {/* Partner Status */}
+
                                 <div className="flex items-center gap-3 mb-6">
-                                    <span className={`w-2 h-2 rounded-full ${selectedPartner.status === 'active' ? 'bg-primary animate-pulse' : 'bg-gray-400'}`}></span>
+
+                                    <span
+                                        className={`w-2 h-2 rounded-full ${
+                                            selectedPartner.status ===
+                                            "active"
+                                                ? "bg-primary animate-pulse"
+                                                : "bg-gray-400"
+                                        }`}
+                                    />
+
                                     <span className="text-xs font-bold text-primary">
-                                        الحالة: {selectedPartner.status || 'متاح'}
+                                        {t("storeLocator.status")}:{" "}
+                                        {selectedPartner.status ||
+                                            t(
+                                                "storeLocator.available"
+                                            )}
                                     </span>
+
                                 </div>
+
+                                {/* Directions */}
 
                                 <a
                                     href={`https://www.google.com/maps/dir/?api=1&destination=${selectedPartner.lat},${selectedPartner.lng}`}
@@ -171,16 +326,27 @@ export default function StoreLocator() {
                                     rel="noreferrer"
                                     className="w-full bg-primary text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-accent-hover transition-colors"
                                 >
-                                    <span className="material-symbols-outlined text-[20px]">directions</span>
-                                    <span>الاتجاهات</span>
+
+                                    <span className="material-symbols-outlined text-[20px]">
+                                        directions
+                                    </span>
+
+                                    <span>
+                                        {t(
+                                            "storeLocator.directions"
+                                        )}
+                                    </span>
+
                                 </a>
+
                             </div>
+
                         </div>
                     )}
 
                 </div>
+
             </div>
         </section>
     );
 }
-
