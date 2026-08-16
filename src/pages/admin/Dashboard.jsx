@@ -1,8 +1,35 @@
+
+import { useEffect, useState } from "react";
 import StatCard from "../../components/admin/StatCard";
 import RecentOrders from "../../components/admin/RecentOrders";
 import StockAlerts from "../../components/admin/StockAlerts";
+import { orderService } from "../../Services/orderService";
 
 export default function Dashboard() {
+    
+    const [loading, setLoading] = useState(true);
+    const [data, setData] = useState({
+        stats: null,
+        recentOrders: [],
+    });
+
+    useEffect(() => {
+        // جلب البيانات من الـ API عند فتح الصفحة
+        orderService.getDashboardData()
+            .then((res) => {
+                setData({
+                    stats: res.stats,
+                    recentOrders: res.recentOrders,
+                });
+            })
+            .catch((err) => console.error(err))
+            .finally(() => setLoading(false));
+    }, []);
+
+    if (loading) {
+        return <div className="p-8 text-center muted">جاري تحميل البيانات...</div>;
+    }
+
     return (
         <div className="dashboard">
 
@@ -21,14 +48,14 @@ export default function Dashboard() {
 
             {/* Statistics */}
             <div className="stats-grid">
-
                 <StatCard
                     title="إجمالي المبيعات"
-                    value="45,280 ريال"
-                    description="+12.5% من الشهر الماضي"
+                    value={orderService.formatCurrency(data.stats?.total_sales)}
+                    description="المبيعات المكتملة"
                     icon="payments"
                     type="primary"
                 />
+
 
                 <StatCard
                     title="المستخدمون النشطون"
@@ -38,13 +65,16 @@ export default function Dashboard() {
                     type="secondary"
                 />
 
+
                 <StatCard
                     title="طلبات معلقة"
-                    value="24"
-                    description="تحتاج إلى معالجة فورية"
+                    value={data.stats?.pending_orders ?? 0}
+                    description={data.stats?.pending_orders > 0 ? "تحتاج إلى معالجة فورية" : "لا توجد طلبات معلقة"}
                     icon="pending_actions"
                     type="warning"
+                    to="/admin/orders?status=pending"
                 />
+
 
                 <StatCard
                     title="منتجات قاربت على النفاد"
@@ -59,8 +89,7 @@ export default function Dashboard() {
             {/* Dashboard Content */}
             <div className="dashboard-grid">
 
-                <RecentOrders />
-
+                <RecentOrders orders={data.recentOrders} />
                 <StockAlerts />
 
             </div>

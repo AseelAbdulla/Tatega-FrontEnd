@@ -5,6 +5,7 @@ const menuItems = [
         label: "لوحة التحكم",
         icon: "dashboard",
         path: "/admin",
+        end: true
     },
     {
         label: "الملف الشخصي",
@@ -89,6 +90,7 @@ export default function AdminSidebar({ isOpen, onClose }) {
                             key={item.path}
                             to={item.path}
                             onClick={onClose}
+                            end={item.end}
                             className={({ isActive }) =>
                                 `admin-nav-item ${
                                     isActive

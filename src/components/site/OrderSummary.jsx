@@ -224,7 +224,7 @@ const { t, i18n } = useTranslation();
                                         <span className="material-symbols-outlined text-on-surface-variant">
                                             {paymentReceipt ? 'check_circle' : 'upload_file'}
                                         </span>
-                                        <span className="text-label-sm text-on-surface-variant truncate max-w-[200px]">
+                                        <span className="text-label-sm text-on-surface-variant truncate max-w-50">
                                             {receiptFileName || t('payment.choose_file', 'اختر ملفاً...')}
                                         </span>
                                     </label>

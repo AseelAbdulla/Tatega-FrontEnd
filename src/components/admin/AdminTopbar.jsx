@@ -47,13 +47,8 @@ export default function AdminTopbar({ onMenuClick }) {
                     <span className="notification-dot" />
                 </button>
 
-                <button className="admin-icon-button">
-                    <span className="material-symbols-outlined">
-                        search
-                    </span>
-                </button>
 
-                <div className="admin-divider" />
+                {/* <div className="admin-divider" />
 
                 <div className="admin-language">
                     <span>AR</span>
@@ -61,7 +56,7 @@ export default function AdminTopbar({ onMenuClick }) {
                     <span className="material-symbols-outlined">
                         language
                     </span>
-                </div>
+                </div> */}
 
             </div>
 

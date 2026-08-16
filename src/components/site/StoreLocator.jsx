@@ -4,49 +4,49 @@ import {
     TileLayer,
     CircleMarker,
     Popup,
-    Tooltip,
     useMap
 } from "react-leaflet";
 import L from 'leaflet';
 import { partnerService } from '../../services/partnerService';
 
-// إصلاح مشكلة أيقونات Leaflet الافتراضية
-import markerIconPng from 'leaflet/dist/images/marker-icon.png';
-import markerShadowPng from 'leaflet/dist/images/marker-shadow.png';
-
-const customIcon = new L.Icon({
-    iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-    shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-});
-// مكون مساعد لإعادة توجيه كاميرا الخريطة نحو الفرع المحدد
 function ChangeMapView({ coords }) {
     const map = useMap();
     map.setView(coords, 13);
     return null;
 }
 
+// دالة حساب المسافة بالكيلومتر (Haversine Formula)
+const calculateDistance = (lat1, lon1, lat2, lon2) => {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * (Math.PI / 180);
+    const dLon = (lon2 - lon1) * (Math.PI / 180);
+    const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+};
+
 export default function StoreLocator() {
     const [partners, setPartners] = useState([]);
     const [selectedPartner, setSelectedPartner] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [locating, setLocating] = useState(false);
 
     useEffect(() => {
         partnerService.getPublicPartners()
             .then((data) => {
-                // تصفية العناصر التي تحتوي على إحداثيات صحيحة فقط
                 const validPartners = data.filter(p => p.lat && p.lng);
                 setPartners(validPartners);
                 if (validPartners.length > 0) {
-                    setSelectedPartner(validPartners[0]); // اختيار أول فرع افتراضياً
+                    setSelectedPartner(validPartners[0]);
                 }
             })
             .catch((err) => console.error("خطأ في جلب الفروع:", err))
             .finally(() => setLoading(false));
     }, []);
 
-    // دالة مساعدة لقراءة اسم الفرع من حقل الـ name الخاضع لـ array cast
     const getPartnerName = (name) => {
         if (!name) return 'فرع تعتيقة';
         if (typeof name === 'string') return name;
@@ -54,10 +54,49 @@ export default function StoreLocator() {
         return 'فرع تعتيقة';
     };
 
-    // مركز الخريطة الافتراضي
-    const defaultPosition = selectedPartner
-        ? [parseFloat(selectedPartner.lat), parseFloat(selectedPartner.lng)]
-        : [24.7136, 46.6753]; // إحداثيات افتراضية
+    // دالة العثور على أقرب فرع لموقع المستخدم
+    const findNearestPartner = () => {
+        if (!navigator.geolocation) {
+            alert("خدمة تحديد الموقع غير مدعومة في متصفحك.");
+            return;
+        }
+
+        setLocating(true);
+
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const userLat = position.coords.latitude;
+                const userLng = position.coords.longitude;
+
+                let nearest = null;
+                let minDistance = Infinity;
+
+                partners.forEach((partner) => {
+                    const dist = calculateDistance(
+                        userLat,
+                        userLng,
+                        parseFloat(partner.lat),
+                        parseFloat(partner.lng)
+                    );
+
+                    if (dist < minDistance) {
+                        minDistance = dist;
+                        nearest = { ...partner, distance: dist.toFixed(1) };
+                    }
+                });
+
+                if (nearest) {
+                    setSelectedPartner(nearest);
+                }
+                setLocating(false);
+            },
+            (error) => {
+                console.error("خطأ في تحديد الموقع:", error);
+                alert("تعذر الوصول إلى موقعك الحالي. يرجى تفعيل الإذن.");
+                setLocating(false);
+            }
+        );
+    };
 
     if (loading) {
         return (
@@ -70,29 +109,31 @@ export default function StoreLocator() {
     return (
         <section className="py-16 bg-surface-container/50" id="parteners">
             <div className="px-4 md:px-16 max-w-7xl mx-auto">
-                <div className="text-center mb-12">
+                <div className="text-center mb-8">
                     <span className="text-accent-terracotta font-bold text-xs mb-4 block uppercase">
                         تواصل معنا مكانياً
                     </span>
-                    <h2 className="text-3xl font-bold text-primary mb-6">ابحث عن جذورنا وفروعنا</h2>
+                    <h2 className="text-3xl font-bold text-primary mb-4">ابحث عن جذورنا وفروعنا</h2>
+
+                    {/* زر العثور على أقرب فرع */}
+                    <button
+                        onClick={findNearestPartner}
+                        disabled={locating}
+                        className="bg-primary hover:bg-accent-hover text-white px-6 py-2.5 rounded-full font-bold text-sm transition-all shadow-md flex items-center gap-2 mx-auto disabled:opacity-50"
+                    >
+                        <span className="material-symbols-outlined text-lg">my_location</span>
+                        <span>{locating ? 'جاري تحديد موقعك...' : 'تحديد أقرب فرع لي'}</span>
+                    </button>
                 </div>
 
-                {/* الحاوية الأب الرئيسية - يجب أن تكون relative */}
                 <div className="relative rounded-[3rem] overflow-hidden rustic-shadow border border-black/10 z-0" style={{ height: '500px', width: '100%' }}>
 
-                    {/* 1. الخريطة (تحتوي فقط على مكونات Leaflet) */}
                     <MapContainer
                         center={[15, 40]}
                         zoom={3}
                         minZoom={2}
-                        maxZoom={6}
-                        zoomSnap={0.5}
-                        zoomDelta={0.5}
-                        style={{
-                            height: "500px",
-                            width: "100%",
-                            borderRadius: "10px",
-                        }}
+                        maxZoom={16}
+                        style={{ height: "500px", width: "100%", borderRadius: "10px" }}
                     >
                         <TileLayer
                             attribution="© OpenStreetMap"
@@ -103,8 +144,6 @@ export default function StoreLocator() {
                             <ChangeMapView coords={[parseFloat(selectedPartner.lat), parseFloat(selectedPartner.lng)]} />
                         )}
 
-
-                        {/* 2. استبدال Marker بـ CircleMarker وتنسيقه بألوان الهوية */}
                         {partners.map((partner) => {
                             const isSelected = selectedPartner?.id === partner.id;
 
@@ -112,12 +151,12 @@ export default function StoreLocator() {
                                 <CircleMarker
                                     key={partner.id}
                                     center={[parseFloat(partner.lat), parseFloat(partner.lng)]}
-                                    radius={isSelected ? 10 : 6} // نصف القطر بالبكسل (يكبر عند التحديد)
+                                    radius={isSelected ? 10 : 6}
                                     pathOptions={{
-                                        color: isSelected ? '#F07A26' : '#24572b',       // لون الإطار الخارجي (برتقالي إذا محدد / أخضر للملف العام)
-                                        fillColor: isSelected ? '#F07A26' : '#24572b',   // لون التعبئة الداخلية
-                                        fillOpacity: isSelected ? 0.9 : 0.6,             // درجة الشفافية
-                                        weight: isSelected ? 2 : 1                       // سمك الإطار الخارجي
+                                        color: isSelected ? '#F07A26' : '#24572b',
+                                        fillColor: isSelected ? '#F07A26' : '#24572b',
+                                        fillOpacity: isSelected ? 0.9 : 0.6,
+                                        weight: isSelected ? 2 : 1
                                     }}
                                     eventHandlers={{
                                         click: () => setSelectedPartner(partner)
@@ -126,16 +165,6 @@ export default function StoreLocator() {
                                     <Popup>
                                         <div className="text-right p-1">
                                             <h4 className="font-bold text-primary">{getPartnerName(partner.name)}</h4>
-                                            {partner.website_url && (
-                                                <a
-                                                    href={partner.website_url}
-                                                    target="_blank"
-                                                    rel="noreferrer"
-                                                    className="text-xs text-accent-terracotta underline block mt-1"
-                                                >
-                                                    زيارة الموقع
-                                                </a>
-                                            )}
                                         </div>
                                     </Popup>
                                 </CircleMarker>
@@ -143,7 +172,7 @@ export default function StoreLocator() {
                         })}
                     </MapContainer>
 
-                    {/* 2. الكارت العائم (خارج MapContainer وتحت تأثير absolute للبُعد الرئيسي) */}
+                    {/* الكارت العائم */}
                     {selectedPartner && (
                         <div className="absolute top-10 right-10 z-1000 w-full max-w-xs pointer-events-auto">
                             <div className="bg-white/90 backdrop-blur-md p-8 rounded-3xl border border-white/50 shadow-2xl">
@@ -154,9 +183,16 @@ export default function StoreLocator() {
                                         className="w-16 h-16 object-contain mb-4 rounded-lg bg-background p-1"
                                     />
                                 )}
-                                <h4 className="font-bold text-primary text-lg mb-2">
+                                <h4 className="font-bold text-primary text-lg mb-1">
                                     {getPartnerName(selectedPartner.name)}
                                 </h4>
+
+                                {/* عرض المسافة بالكيلومتر إذا تم حسابها */}
+                                {selectedPartner.distance && (
+                                    <p className="text-xs text-accent-terracotta font-bold mb-3">
+                                        يبعد عنك حوالي {selectedPartner.distance} كم
+                                    </p>
+                                )}
 
                                 <div className="flex items-center gap-3 mb-6">
                                     <span className={`w-2 h-2 rounded-full ${selectedPartner.status === 'active' ? 'bg-primary animate-pulse' : 'bg-gray-400'}`}></span>
