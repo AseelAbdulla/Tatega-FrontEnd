@@ -6,19 +6,9 @@ import {
     TileLayer,
     CircleMarker,
     Popup,
-<<<<<<< HEAD
     useMap
-=======
-    useMap,
->>>>>>> 6b0dec191e1e6789d71b3a886bd9ed76dbff065c
 } from "react-leaflet";
 
-<<<<<<< HEAD
-=======
-import { partnerService } from "../../services/partnerService";
-
-// مكون مساعد لإعادة توجيه كاميرا الخريطة نحو الفرع المحدد
->>>>>>> 6b0dec191e1e6789d71b3a886bd9ed76dbff065c
 function ChangeMapView({ coords }) {
     const map = useMap();
 
@@ -58,15 +48,7 @@ export default function StoreLocator() {
         partnerService
             .getPublicPartners()
             .then((data) => {
-<<<<<<< HEAD
                 const validPartners = data.filter(p => p.lat && p.lng);
-=======
-                // تصفية الفروع التي تحتوي على إحداثيات صحيحة فقط
-                const validPartners = data.filter(
-                    (partner) => partner.lat && partner.lng
-                );
-
->>>>>>> 6b0dec191e1e6789d71b3a886bd9ed76dbff065c
                 setPartners(validPartners);
 
                 if (validPartners.length > 0) {
@@ -81,15 +63,6 @@ export default function StoreLocator() {
             });
     }, []);
 
-<<<<<<< HEAD
-=======
-    /*
-    |--------------------------------------------------------------------------
-    | Get Localized Partner Name
-    |--------------------------------------------------------------------------
-    */
-
->>>>>>> 6b0dec191e1e6789d71b3a886bd9ed76dbff065c
     const getPartnerName = (name) => {
         if (!name) {
             return t("storeLocator.defaultBranch");
@@ -134,7 +107,6 @@ export default function StoreLocator() {
         return t("storeLocator.defaultBranch");
     };
 
-<<<<<<< HEAD
     // دالة العثور على أقرب فرع لموقع المستخدم
     const findNearestPartner = () => {
         if (!navigator.geolocation) {
@@ -178,26 +150,6 @@ export default function StoreLocator() {
             }
         );
     };
-=======
-    /*
-    |--------------------------------------------------------------------------
-    | Default Map Position
-    |--------------------------------------------------------------------------
-    */
-
-    const defaultPosition = selectedPartner
-        ? [
-              parseFloat(selectedPartner.lat),
-              parseFloat(selectedPartner.lng),
-          ]
-        : [24.7136, 46.6753];
-
-    /*
-    |--------------------------------------------------------------------------
-    | Loading
-    |--------------------------------------------------------------------------
-    */
->>>>>>> 6b0dec191e1e6789d71b3a886bd9ed76dbff065c
 
     if (loading) {
         return (
@@ -260,11 +212,6 @@ export default function StoreLocator() {
                             />
                         )}
 
-<<<<<<< HEAD
-=======
-                        {/* Partner Markers */}
-
->>>>>>> 6b0dec191e1e6789d71b3a886bd9ed76dbff065c
                         {partners.map((partner) => {
                             const isSelected =
                                 selectedPartner?.id === partner.id;
@@ -272,7 +219,6 @@ export default function StoreLocator() {
                             return (
                                 <CircleMarker
                                     key={partner.id}
-<<<<<<< HEAD
                                     center={[parseFloat(partner.lat), parseFloat(partner.lng)]}
                                     radius={isSelected ? 10 : 6}
                                     pathOptions={{
@@ -280,27 +226,6 @@ export default function StoreLocator() {
                                         fillColor: isSelected ? '#F07A26' : '#24572b',
                                         fillOpacity: isSelected ? 0.9 : 0.6,
                                         weight: isSelected ? 2 : 1
-=======
-                                    center={[
-                                        parseFloat(partner.lat),
-                                        parseFloat(partner.lng),
-                                    ]}
-                                    radius={isSelected ? 10 : 6}
-                                    pathOptions={{
-                                        color: isSelected
-                                            ? "#F07A26"
-                                            : "#24572b",
-
-                                        fillColor: isSelected
-                                            ? "#F07A26"
-                                            : "#24572b",
-
-                                        fillOpacity: isSelected
-                                            ? 0.9
-                                            : 0.6,
-
-                                        weight: isSelected ? 2 : 1,
->>>>>>> 6b0dec191e1e6789d71b3a886bd9ed76dbff065c
                                     }}
                                     eventHandlers={{
                                         click: () =>
@@ -312,32 +237,7 @@ export default function StoreLocator() {
 
                                     <Popup>
                                         <div className="text-right p-1">
-<<<<<<< HEAD
                                             <h4 className="font-bold text-primary">{getPartnerName(partner.name)}</h4>
-=======
-
-                                            <h4 className="font-bold text-primary">
-                                                {getPartnerName(
-                                                    partner.name
-                                                )}
-                                            </h4>
-
-                                            {partner.website_url && (
-                                                <a
-                                                    href={
-                                                        partner.website_url
-                                                    }
-                                                    target="_blank"
-                                                    rel="noreferrer"
-                                                    className="text-xs text-accent-terracotta underline block mt-1"
-                                                >
-                                                    {t(
-                                                        "storeLocator.visitWebsite"
-                                                    )}
-                                                </a>
-                                            )}
-
->>>>>>> 6b0dec191e1e6789d71b3a886bd9ed76dbff065c
                                         </div>
                                     </Popup>
 
@@ -347,12 +247,7 @@ export default function StoreLocator() {
 
                     </MapContainer>
 
-<<<<<<< HEAD
                     {/* الكارت العائم */}
-=======
-                    {/* Floating Partner Card */}
-
->>>>>>> 6b0dec191e1e6789d71b3a886bd9ed76dbff065c
                     {selectedPartner && (
                         <div className="absolute top-10 right-10 z-[1000] w-full max-w-xs pointer-events-auto">
 
@@ -367,7 +262,6 @@ export default function StoreLocator() {
                                         className="w-16 h-16 object-contain mb-4 rounded-lg bg-background p-1"
                                     />
                                 )}
-<<<<<<< HEAD
                                 <h4 className="font-bold text-primary text-lg mb-1">
                                     {getPartnerName(selectedPartner.name)}
                                 </h4>
@@ -378,18 +272,6 @@ export default function StoreLocator() {
                                         يبعد عنك حوالي {selectedPartner.distance} كم
                                     </p>
                                 )}
-=======
-
-                                {/* Partner Name */}
-
-                                <h4 className="font-bold text-primary text-lg mb-2">
-                                    {getPartnerName(
-                                        selectedPartner.name
-                                    )}
-                                </h4>
-
-                                {/* Partner Status */}
->>>>>>> 6b0dec191e1e6789d71b3a886bd9ed76dbff065c
 
                                 <div className="flex items-center gap-3 mb-6">
 
