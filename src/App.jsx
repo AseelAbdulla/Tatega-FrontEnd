@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import { CartProvider } from "./context/CartContext";
 
+import Reviews from "./pages/site/Reviews";
 import SiteLayout from "./layouts/SiteLayout";
 import AdminLayout from "./layouts/AdminLayout";
 
@@ -33,6 +34,7 @@ export default function App() {
 
                     <Route element={<SiteLayout />}>
                         <Route path="/" element={<Home />} />
+                        <Route path="/reviews" element={<Reviews />} />
                         <Route path="/cart" element={<Cart />} />
                         <Route
                             path="/OrderSuccess"

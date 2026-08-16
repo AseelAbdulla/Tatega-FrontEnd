@@ -48,6 +48,33 @@
     "cart": "Cart",
     "account": "Account"
   
+},
+"reviews": {
+    "loading": "Loading reviews...",
+    "subtitle": "Our Customers' Reviews",
+    "title": "What Our Customers Say",
+    "empty": "There are no reviews yet.",
+    "customer": "Customer",
+    "summary": "Reviews Summary",
+    "basedOn": "Based on {{count}} reviews from our customers",
+    "stars": "{{count}} stars",
+    "shareOpinion": "Share Your Opinion",
+    "shareDescription": "Your experience matters to us and helps us continuously improve.",
+    "overallRating": "Overall Rating",
+    "name": "Full Name",
+    "namePlaceholder": "Example: Ahmed Mohammed",
+    "email": "Email Address",
+    "emailPlaceholder": "email@example.com",
+    "comment": "Write Your Review",
+    "commentPlaceholder": "What do you think about the quality of our products and packaging?",
+    "publish": "Publish Review",
+    "latest": "Latest Reviews",
+    "addReview": "Add Your Review",
+    "sort": {
+        "latest": "Latest First",
+        "highest": "Highest Rated",
+        "lowest": "Lowest Rated"
+    },
+    "loadMore": "Load More Reviews"
 }
-
 }
