@@ -1,0 +1,53 @@
+{
+  "navbar": {
+    "home": "Home",
+    "products": "Products",
+    "categories": "Categories",
+    "why_us": "Why Us",
+    "branches": "Our Branches",
+    "reviews": "Reviews",
+    "contact": "Contact Us",
+    "menu": "Main Menu"
+  },
+  "storeLocator": {
+    "label": "Find Us",
+    "title": "Discover Our Roots & Branches",
+    "loading": "Loading branches and points of sale...",
+    "visitWebsite": "Visit Website",
+    "status": "Status",
+    "available": "Available",
+    "directions": "Get Directions",
+    "defaultBranch": "Tatega Branch"
+},
+
+  "nav": {
+    "home": "Home",
+    "store": "Store",
+    "cart": "Cart",
+    "account": "Account"
+  },
+  "footer": {
+    "brand": "Taateeqa",
+    "description": "Premium spices and organic dried fruits, brought from the heart of nature to your table while preserving tradition and quality.",
+    "contact": "Contact Us",
+    "categories": "Categories",
+    "importerPortal": "Importer Portal",
+    "importerLogin": "Importer Login",
+    "becomeImporter": "Become an Importer",
+    "spices": "Spices & Seasonings",
+    "driedFruits": "Dried Fruits",
+    "naturalOils": "Natural Oils",
+    "nuts": "Nuts",
+    "terms": "Terms & Conditions",
+    "shipping": "Shipping Policy",
+    "copyright": "© 2026 Taateeqa Premium Spices. All rights reserved."
+  },
+  "bottomNav": {
+    "home": "Home",
+    "store": "Store",
+    "cart": "Cart",
+    "account": "Account"
+  
+}
+
+}

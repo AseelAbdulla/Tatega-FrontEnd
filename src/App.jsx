@@ -1,4 +1,8 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
+
+import { CartProvider } from "./context/CartContext";
 
 import SiteLayout from "./layouts/SiteLayout";
 import AdminLayout from "./layouts/AdminLayout";
@@ -11,11 +15,18 @@ import Dashboard from "./pages/admin/Dashboard";
 import Categories from "./pages/admin/Categories";
 import Products from "./pages/admin/Products";
 import Orders from "./pages/admin/Orders";
-
-import { CartProvider } from "./context/CartContext";
 import Pos from "./pages/admin/Pos";
 
 export default function App() {
+  const { i18n } = useTranslation();
+
+  useEffect(() => {
+    const lang = i18n.language?.startsWith("en") ? "en" : "ar";
+
+    document.documentElement.lang = lang;
+    document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
+  }, [i18n.language]);
+
   return (
     <CartProvider>
       <Router>
