@@ -1,4 +1,3 @@
-<<<<<<< Updated upstream
 
 // import HeroCarousel from '../../components/site/HeroCarousel';
 // import BestSellersSection from '../../components/site/BestSellersSection';
@@ -6,127 +5,18 @@
 // import WhyUsTimeline from '../../components/site/WhyUsTimeline';
 import StoreLocator from '../../components/site/StoreLocator';
 // import TestimonialsCarousel from '../../components/site/TestimonialsCarousel';
+import from "../../components/site/BannerCarousel";
+import from "../../components/site/HomeFeatures";
+import Reviews from "../../components/site/Reviews";
+
 
 export default function Home() {
-=======
-import { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { Link, useNavigate } from "react-router-dom";
-
-import StoreLocator from "../../components/site/StoreLocator";
-
-const API_URL = "http://127.0.0.1:8000";
-
-export default function Home() {
-  const { t, i18n } = useTranslation();
-  const navigate = useNavigate();
-
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-
-  const currentLanguage = i18n.language?.startsWith("en")
-    ? "en"
-    : "ar";
-
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        setLoading(true);
-
-        const response = await fetch(
-          `${API_URL}/api/products`,
-          {
-            headers: {
-              Accept: "application/json",
-            },
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch products");
-        }
-
-        const result = await response.json();
-
-        const productData = Array.isArray(result)
-          ? result
-          : result.data || [];
-
-        // نعرض أول 8 منتجات في الصفحة الرئيسية
-        setProducts(productData.slice(0, 8));
-
-      } catch (error) {
-        console.error(error);
-
-        setError(
-          currentLanguage === "ar"
-            ? "تعذر تحميل المنتجات"
-            : "Unable to load products"
-        );
-
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProducts();
-  }, [currentLanguage]);
-
-  // اسم المنتج حسب اللغة
-  const getProductName = (product) => {
-    return (
-      product.name?.[currentLanguage] ||
-      product.name?.ar ||
-      product.name?.en ||
-      ""
-    );
-  };
-
-  // الصورة الرئيسية فقط
-  const getMainImage = (product) => {
-    if (!product.images || product.images.length === 0) {
-      return "/images/product-placeholder.png";
-    }
-
-    const mainImage =
-      product.images.find(
-        (image) =>
-          image.is_main === true ||
-          image.is_main === 1
-      ) || product.images[0];
-
-    return (
-      mainImage.image ||
-      "/images/product-placeholder.png"
-    );
-  };
-
-  // إضافة للسلة
-  const handleAddToCart = (product) => {
-    const token =
-      localStorage.getItem("token") ||
-      localStorage.getItem("access_token");
-
-    if (!token) {
-      navigate("/login");
-      return;
-    }
-
-    // سنربطه بالـ Cart API بعد التأكد من عرض المنتجات
-    console.log("Add to cart:", product);
-
-    alert(
-      currentLanguage === "ar"
-        ? "تمت إضافة المنتج إلى السلة"
-        : "Product added to cart"
-    );
-  };
-
->>>>>>> Stashed changes
   return (
     <div>
+  <BannerCarousel />
 
+            <HomeFeatures />
+ 
       {/* =========================
           Products Section
       ========================= */}
@@ -322,7 +212,9 @@ export default function Home() {
 
       {/* Store Locator */}
       <StoreLocator />
+        <Reviews />
 
     </div>
   );
+
 }

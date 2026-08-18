@@ -5,8 +5,12 @@ import { useTranslation } from "react-i18next";
 import { CartProvider } from "./context/CartContext";
 import { LanguageProvider } from "./context/LanguageContext";
 
+import { CartProvider } from "./context/CartContext";
+
+import Reviews from "./pages/site/Reviews";
 import SiteLayout from "./layouts/SiteLayout";
 import AdminLayout from "./layouts/AdminLayout";
+import Banners from "./pages/admin/Banners";
 
 // ==================== Site Pages ====================
 import Home from "./pages/site/Home";
