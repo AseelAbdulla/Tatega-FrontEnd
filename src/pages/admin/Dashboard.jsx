@@ -2,6 +2,7 @@ import StatCard from "../../components/admin/StatCard";
 import RecentOrders from "../../components/admin/RecentOrders";
 import StockAlerts from "../../components/admin/StockAlerts";
 
+
 export default function Dashboard() {
     return (
         <div className="dashboard">
