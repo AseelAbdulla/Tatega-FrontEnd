@@ -6,6 +6,7 @@ export default function OrdersHeader({ activeTab, setActiveTab, orders = [], sta
     const totalSales = stats?.stats?.total_sales
         ?? stats?.total_sales
         ?? 0;
+
     const activeClass = "flex-1 py-1.5 px-3 rounded-lg font-bold transition-all text-on-secondary-container bg-secondary-container shadow-sm flex items-center justify-center gap-1.5 text-xs";
     const inactiveClass = "flex-1 py-1.5 px-3 rounded-lg font-bold transition-all text-on-surface-variant hover:bg-surface-container flex items-center justify-center gap-1.5 text-xs";
 
@@ -31,6 +32,7 @@ export default function OrdersHeader({ activeTab, setActiveTab, orders = [], sta
             {/* تبويب مصغر */}
             <div className="bg-surface-container-low p-0.5 rounded-xl flex max-w-xs">
                 <button
+                    type="button"
                     className={activeTab === 'local' ? activeClass : inactiveClass}
                     onClick={() => setActiveTab('local')}
                 >
@@ -38,6 +40,7 @@ export default function OrdersHeader({ activeTab, setActiveTab, orders = [], sta
                     محلية
                 </button>
                 <button
+                    type="button"
                     className={activeTab === 'import' ? activeClass : inactiveClass}
                     onClick={() => setActiveTab('import')}
                 >
@@ -48,3 +51,4 @@ export default function OrdersHeader({ activeTab, setActiveTab, orders = [], sta
         </div>
     );
 }
+

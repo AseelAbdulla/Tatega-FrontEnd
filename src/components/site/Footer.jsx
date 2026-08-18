@@ -111,7 +111,7 @@ export default function Footer() {
 
                             {/* دخول المستوردين */}
                             <Link
-                                to="/importer-login"
+                                to="/login"
                                 className="w-full py-3 bg-accent-terracotta text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-accent-hover transition-all"
                             >
                                 <span className="material-symbols-outlined">
@@ -126,7 +126,7 @@ export default function Footer() {
 
                             {/* كن مستورداً معنا */}
                             <Link
-                                to="/importer-register"
+                                to="/register"
                                 className="w-full py-3 bg-white border border-primary text-primary rounded-xl font-bold transition-all duration-250 flex items-center justify-center gap-2 hover:bg-primary hover:text-white"
                             >
                                 <span className="material-symbols-outlined">

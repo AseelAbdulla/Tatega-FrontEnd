@@ -3,11 +3,15 @@ import api from '../services/api';
 export const orderService = {
     // ------------------ API Requests (Admin) ------------------ //
 
-    // 1. جلب كل الطلبات للإدارة
-    getAdminOrders: async () => {
-        const response = await api.get('/admin/orders');
+
+    // 1. جلب كل الطلبات للإدارة مع فلترة التبويب (local / import)
+    getAdminOrders: async (type = null) => {
+        const response = await api.get('/admin/orders', {
+            params: type ? { type } : {}
+        });
         return response.data?.data || response.data;
     },
+
 
     // 2. جلب تفاصيل طلب محدد
     getOrderDetails: async (orderId) => {
@@ -29,7 +33,7 @@ export const orderService = {
 
     // 5. تغيير حالة الطلب
     updateOrderStatus: async (orderId, status, rejectionReason = null) => {
-        const payload = {status};
+        const payload = { status };
         if (status === 'rejected' && rejectionReason) {
             payload.rejection_reason = rejectionReason;
         }
