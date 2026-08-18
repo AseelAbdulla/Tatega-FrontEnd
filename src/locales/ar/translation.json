@@ -76,6 +76,49 @@
         "lowest": "الأقل تقييماً"
     },
     "loadMore": "عرض المزيد من المراجعات"
+},
+"homeFeatures": {
+  "label": "قيمنا وجذورنا",
+  "title": "لماذا تختار تعتيقة؟",
+
+  "features": {
+    "premiumQuality": {
+      "title": "الجودة الفائقة",
+      "english": "Premium Quality",
+      "description": "نختار محاصيلنا بعناية فائقة لضمان أفضل مذاق وتجربة عطرية فريدة، حيث تخضع كل حبة لاختبارات جودة صارمة قبل أن تصل إليك."
+    },
+
+    "carefullySelected": {
+      "title": "مختارات بعناية",
+      "english": "Carefully Selected",
+      "description": "مكونات طبيعية منتقاة يدوياً من مزارع مستدامة، نؤمن أن اليد التي تزرع بحب تنتج أفضل ما في الطبيعة."
+    },
+
+    "naturalIngredients": {
+      "title": "مكونات طبيعية",
+      "english": "Natural Ingredients",
+      "description": "أصالة، نضارة، وعضوية 100%. خالية من المواد الحافظة أو الإضافات الصناعية، تماماً كما أرادتها الطبيعة."
+    },
+
+    "trustedCustomers": {
+      "title": "ثقة العملاء",
+      "english": "Trusted by Customers",
+      "description": "بنينا علاقتنا معكم على الموثوقية والتميز. آلاف القصص الناجحة وتجارب العافية التي نفخر بكوننا جزءاً منها."
+    },
+
+    "fastDelivery": {
+      "title": "توصيل سريع وموثوق",
+      "english": "Fast & Reliable Delivery",
+      "description": "تجربة تسوق سلسة تبدأ من المتجر وتنتهي عند باب منزلك بتغليف يحفظ الجودة وسرعة تليق بانتظارك."
+    },
+
+    "secureShopping": {
+      "title": "تسوق آمن",
+      "english": "Secure Shopping",
+      "description": "ثقة كاملة في كل طلب. نستخدم أحدث تقنيات التشفير لضمان خصوصية بياناتك وأمان مدفوعاتك في كل مرة."
+    }
+  }
 }
+
 }
   
