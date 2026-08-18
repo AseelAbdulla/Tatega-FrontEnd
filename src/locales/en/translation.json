@@ -48,6 +48,75 @@
     "cart": "Cart",
     "account": "Account"
   
-}
+},
+"reviews": {
+    "loading": "Loading reviews...",
+    "subtitle": "Our Customers' Reviews",
+    "title": "What Our Customers Say",
+    "empty": "There are no reviews yet.",
+    "customer": "Customer",
+    "summary": "Reviews Summary",
+    "basedOn": "Based on {{count}} reviews from our customers",
+    "stars": "{{count}} stars",
+    "shareOpinion": "Share Your Opinion",
+    "shareDescription": "Your experience matters to us and helps us continuously improve.",
+    "overallRating": "Overall Rating",
+    "name": "Full Name",
+    "namePlaceholder": "Example: Ahmed Mohammed",
+    "email": "Email Address",
+    "emailPlaceholder": "email@example.com",
+    "comment": "Write Your Review",
+    "commentPlaceholder": "What do you think about the quality of our products and packaging?",
+    "publish": "Publish Review",
+    "latest": "Latest Reviews",
+    "addReview": "Add Your Review",
+    "sort": {
+        "latest": "Latest First",
+        "highest": "Highest Rated",
+        "lowest": "Lowest Rated"
+    },
+    "loadMore": "Load More Reviews"
+},
+"homeFeatures": {
+  "label": "Our Values & Roots",
+  "title": "Why Choose Taeteeqah?",
 
+  "features": {
+    "premiumQuality": {
+      "title": "Premium Quality",
+      "english": "Premium Quality",
+      "description": "We carefully select our crops to ensure the best taste and a unique aromatic experience. Every product undergoes strict quality checks before reaching you."
+    },
+
+    "carefullySelected": {
+      "title": "Carefully Selected",
+      "english": "Carefully Selected",
+      "description": "Naturally sourced ingredients carefully selected from sustainable farms. We believe that what is grown with care brings out the best of nature."
+    },
+
+    "naturalIngredients": {
+      "title": "Natural Ingredients",
+      "english": "Natural Ingredients",
+      "description": "Authentic, fresh, and 100% organic. Free from preservatives and artificial additives, just as nature intended."
+    },
+
+    "trustedCustomers": {
+      "title": "Trusted by Customers",
+      "english": "Trusted by Customers",
+      "description": "We built our relationship with you on trust and excellence, with thousands of successful experiences that we are proud to be part of."
+    },
+
+    "fastDelivery": {
+      "title": "Fast & Reliable Delivery",
+      "english": "Fast & Reliable Delivery",
+      "description": "A seamless shopping experience from our store to your doorstep, with packaging that preserves quality and delivery you can rely on."
+    },
+
+    "secureShopping": {
+      "title": "Secure Shopping",
+      "english": "Secure Shopping",
+      "description": "Complete confidence with every order. We use modern encryption technologies to protect your privacy and payment security every time."
+    }
+  }
+}
 }
