@@ -5,24 +5,34 @@ import { useTranslation } from "react-i18next";
 import { CartProvider } from "./context/CartContext";
 import { LanguageProvider } from "./context/LanguageContext";
 
-import { CartProvider } from "./context/CartContext";
-
-import Reviews from "./pages/site/Reviews";
+// Layouts
 import SiteLayout from "./layouts/SiteLayout";
 import AdminLayout from "./layouts/AdminLayout";
-import Banners from "./pages/admin/Banners";
 
-// ==================== Site Pages ====================
+// Site Pages
 import Home from "./pages/site/Home";
 import Products from "./pages/site/Products";
 import ProductDetails from "./pages/site/ProductDetails";
 import Cart from "./pages/site/Cart";
 import OrderSuccess from "./pages/site/OrderSuccess";
+import Register from "./pages/site/Register";
+import Login from "./pages/site/Login";
 
-// ==================== Admin Pages ====================
+// Admin Pages
 import Dashboard from "./pages/admin/Dashboard";
 import Categories from "./pages/admin/Categories";
 import AdminProducts from "./pages/admin/Products";
+import Roles from "./pages/admin/Roles";
+import Users from "./pages/admin/Users";
+import UserDetails from "./pages/admin/UserDetails";
+import Address from "./pages/admin/Address";
+import UserEdit from "./pages/admin/UserEdit";
+import InternationalImport from "./pages/admin/InternationalImport";
+import LocalCustomers from "./pages/admin/LocalCustomers";
+import OrderHistory from "./pages/admin/OrderHistory";
+import Profile from "./pages/admin/Profile";
+import PaymentMethods from "./pages/admin/PaymentMethods";
+import Password from "./pages/admin/Password";
 
 export default function App() {
     const { i18n } = useTranslation();
@@ -54,7 +64,7 @@ export default function App() {
                                 element={<Home />}
                             />
 
-                            {/* صفحة المنتجات */}
+                            {/* المنتجات */}
                             <Route
                                 path="/products"
                                 element={<Products />}
@@ -78,6 +88,18 @@ export default function App() {
                                 element={<OrderSuccess />}
                             />
 
+                            {/* تسجيل الحساب */}
+                            <Route
+                                path="/register"
+                                element={<Register />}
+                            />
+
+                            {/* تسجيل الدخول */}
+                            <Route
+                                path="/login"
+                                element={<Login />}
+                            />
+
                         </Route>
 
 
@@ -88,19 +110,88 @@ export default function App() {
                             element={<AdminLayout />}
                         >
 
+                            {/* Dashboard */}
                             <Route
                                 index
                                 element={<Dashboard />}
                             />
 
+                            {/* Categories */}
                             <Route
                                 path="categories"
                                 element={<Categories />}
                             />
 
+                            {/* Products */}
                             <Route
                                 path="products"
                                 element={<AdminProducts />}
+                            />
+
+                            {/* Roles */}
+                            <Route
+                                path="roles"
+                                element={<Roles />}
+                            />
+
+                            {/* Users */}
+                            <Route
+                                path="users"
+                                element={<Users />}
+                            />
+
+                            {/* User Details */}
+                            <Route
+                                path="users/:id"
+                                element={<UserDetails />}
+                            />
+
+                            {/* User Address */}
+                            <Route
+                                path="users/:id/address"
+                                element={<Address />}
+                            />
+
+                            {/* Edit User */}
+                            <Route
+                                path="users/:id/edit"
+                                element={<UserEdit />}
+                            />
+
+                            {/* International Customers */}
+                            <Route
+                                path="customers/international"
+                                element={<InternationalImport />}
+                            />
+
+                            {/* Local Customers */}
+                            <Route
+                                path="customers/local"
+                                element={<LocalCustomers />}
+                            />
+
+                            {/* Order History */}
+                            <Route
+                                path="order-history"
+                                element={<OrderHistory />}
+                            />
+
+                            {/* Profile */}
+                            <Route
+                                path="profile"
+                                element={<Profile />}
+                            />
+
+                            {/* Payment Methods */}
+                            <Route
+                                path="payment-methods"
+                                element={<PaymentMethods />}
+                            />
+
+                            {/* Password */}
+                            <Route
+                                path="profile/password"
+                                element={<Password />}
                             />
 
                         </Route>
