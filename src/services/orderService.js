@@ -28,8 +28,12 @@ export const orderService = {
     },
 
     // 5. تغيير حالة الطلب
-    updateOrderStatus: async (orderId, status) => {
-        const response = await api.patch(`/admin/orders/${orderId}/status`, { status });
+    updateOrderStatus: async (orderId, status, rejectionReason = null) => {
+        const payload = {status};
+        if (status === 'rejected' && rejectionReason) {
+            payload.rejection_reason = rejectionReason;
+        }
+        const response = await api.patch(`/admin/orders/${orderId}/status`, payload);
         return response.data;
     },
 
@@ -102,7 +106,7 @@ export const orderService = {
 
     formatCurrency(amount) {
         const cleanAmount = typeof amount === 'number' ? amount : parseFloat(amount) || 0;
-        return new Intl.NumberFormat('ar-YE', {
+        return new Intl.NumberFormat('en-US', {
             maximumFractionDigits: 0
         }).format(cleanAmount) + ' ريال';
     }

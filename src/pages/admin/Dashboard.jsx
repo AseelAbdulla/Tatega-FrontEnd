@@ -41,7 +41,7 @@ export default function Dashboard() {
                 </h1>
 
                 <p>
-                    نظرة عامة على أداء متجر تقية
+                    نظرة عامة على أداء متجر تعتيقة
                 </p>
 
             </div>
@@ -59,7 +59,7 @@ export default function Dashboard() {
 
                 <StatCard
                     title="المستخدمون النشطون"
-                    value="1,482"
+                    value="20"
                     description="+48 مستخدم جديد اليوم"
                     icon="group_add"
                     type="secondary"

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { orderService } from '../../services/orderService';
 
 // رابط السيرفر الأساسي الموجه لمجلد الـ storage
 const STORAGE_BASE_URL = 'http://localhost:8000/storage/'; // قم بتغيير الدومين والمنافذ بحسب سيرفرك المحلي/المباشر
@@ -33,7 +34,7 @@ export default function OrderDetailsModal({ isOpen, onClose, order }) {
     // 1. استخراج بيانات العميل والعنوان
     const customerName = order.customer?.name || 'غير محدد';
     const customerPhone = order.customer?.phone || '-';
-    const address = order.address 
+    const address = order.address
         ? `${order.address.city || ''}، ${order.address.street || ''} (مبنى ${order.address.building || ''})`
         : 'لا يوجد عنوان محدد';
 
@@ -50,6 +51,7 @@ export default function OrderDetailsModal({ isOpen, onClose, order }) {
     const receiptPath = order.payment?.receipt || null;
     const fullReceiptUrl = receiptPath ? `${STORAGE_BASE_URL}${receiptPath.replace(/^\//, '')}` : null;
 
+    const walletNumber = order.payment?.wallet_number || order.payment?.account_number || order.wallet_number || null;
     // 4. المنتجات
     const items = order.items || [];
 
@@ -89,11 +91,11 @@ export default function OrderDetailsModal({ isOpen, onClose, order }) {
                             <span className="text-gray-500 block">التاريخ:</span>
                             <span className="font-bold text-gray-800">{createdAt}</span>
                         </div>
-                        
+
                         <div className="mt-1">
                             <span className="text-gray-500 block">الحالة:</span>
                             <span className="px-2 py-0.5 bg-primary-fixed text-on-primary-fixed rounded-full text-[12px] font-bold">
-                                {order.status}
+                                {orderService.getStatusLabel(order.status)}
                             </span>
                         </div>
 
@@ -112,31 +114,34 @@ export default function OrderDetailsModal({ isOpen, onClose, order }) {
                             </span>
                         </div>
 
-                        {/* <div className="flex justify-between items-center">
-                            <span className="text-gray-500 font-medium">حالة الدفع:</span>
-                            <span className="font-bold text-gray-700">
-                                {paymentStatus}
-                            </span>
-                        </div> */}
 
                         {/* عرض الإيصال بحالة وجوده */}
                         {fullReceiptUrl && (
-                            <div className="pt-2 border-t border-gray-200">
-                                <span className="text-gray-500 block mb-1.5 font-medium">إيصال التحويل:</span>
-                                <div 
-                                    className="relative group cursor-pointer w-24 h-24 rounded-lg overflow-hidden border border-gray-300 bg-gray-100 flex items-center justify-center"
-                                    onClick={() => setIsImagePreviewOpen(true)}
-                                >
-                                    <img 
-                                        src={fullReceiptUrl} 
-                                        alt="إيصال الدفع" 
-                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-                                    />
-                                    <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">
-                                        <span className="material-symbols-outlined text-lg">visibility</span>
+                            <>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-gray-500 font-medium">رقم المحفظة/الحساب:</span>
+                                    <span className="font-bold text-gray-700">
+                                        {walletNumber}
+                                    </span>
+                                </div>
+                                <div className="pt-2 border-t border-gray-200">
+                                    <span className="text-gray-500 block mb-1.5 font-medium">إيصال التحويل:</span>
+                                    <div
+                                        className="relative group cursor-pointer w-24 h-24 rounded-lg overflow-hidden border border-gray-300 bg-gray-100 flex items-center justify-center"
+                                        onClick={() => setIsImagePreviewOpen(true)}
+                                    >
+                                        <img
+                                            src={fullReceiptUrl}
+                                            alt="إيصال الدفع"
+                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                                        />
+                                        <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">
+                                            <span className="material-symbols-outlined text-lg">visibility</span>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
+
+                            </>
                         )}
                     </div>
 
@@ -210,17 +215,17 @@ export default function OrderDetailsModal({ isOpen, onClose, order }) {
 
             {/* نافذة معاينة الإيصال للحجم الكامل */}
             {isImagePreviewOpen && fullReceiptUrl && (
-                <div 
+                <div
                     className="fixed inset-0 z-60 bg-black/80 flex items-center justify-center p-4"
                     onClick={() => setIsImagePreviewOpen(false)}
                 >
                     <div className="relative max-w-2xl max-h-[90vh]">
-                        <img 
-                            src={fullReceiptUrl} 
-                            alt="إيصال الدفع بحجم كامل" 
+                        <img
+                            src={fullReceiptUrl}
+                            alt="إيصال الدفع بحجم كامل"
                             className="max-w-full max-h-[85vh] rounded-lg object-contain"
                         />
-                        <button 
+                        <button
                             onClick={() => setIsImagePreviewOpen(false)}
                             className="absolute -top-10 right-0 text-white hover:text-gray-300"
                         >

@@ -1,22 +1,24 @@
 import { useTranslation } from "react-i18next";
-// import HeroCarousel from '../../components/site/HeroCarousel';
-// import BestSellersSection from '../../components/site/BestSellersSection';
-// import CategoriesGrid from '../../components/site/CategoriesGrid';
-// import WhyUsTimeline from '../../components/site/WhyUsTimeline';
+import { Link } from "react-router-dom"; // إضافة استيراد Link
+
 import StoreLocator from '../../components/site/StoreLocator';
-// import TestimonialsCarousel from '../../components/site/TestimonialsCarousel';
+import BannerCarousel from "../../components/site/BannerCarousel";
+import Reviews from "../../components/site/Reviews";
+import BestSell from "../../components/site/BestSell";
 
 export default function Home() {
-  const { t } = useTranslation();
+
   return (
     <div>
-      {/* <HeroCarousel />
-      <BestSellersSection />
-      <CategoriesGrid />
-      <WhyUsTimeline /> */}
+      <BannerCarousel />
+
+      <BestSell />
+      
+
+      {/* Store Locator */}
       <StoreLocator />
-      {/* <TestimonialsCarousel /> */}
+      <Reviews />
+
     </div>
   );
 }
-

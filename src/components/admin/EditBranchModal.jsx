@@ -152,6 +152,7 @@ export default function EditBranchModal({ isOpen, onClose, branch, onSuccess }) 
         } finally {
             setIsLoading(false);
         }
+        
     };
 
     return (

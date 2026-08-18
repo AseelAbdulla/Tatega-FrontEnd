@@ -4,12 +4,12 @@ export default function BranchDetailsModal({ isOpen, onClose, branch }) {
     if (!isOpen || !branch) return null;
 
     // 1. معالجة اسم الفرع المترجم
-    const branchName = typeof branch.name === 'object' 
-        ? (branch.name?.ar || branch.name?.en || 'غير مسمى') 
+    const branchName = typeof branch.name === 'object'
+        ? (branch.name?.ar || branch.name?.en || 'غير مسمى')
         : (branch.name || 'غير مسمى');
 
     // 2. معالجة رابط الشعار
-    const logoUrl = branch.logo_url || (branch.logo ? `/storage/${branch.logo}` : null);
+    const logoUrl = branch.logo ? (branch.logo.startsWith('http') ? branch.logo : '/storage/${branch.logo}') : (branch.logo_url || null);
 
     // 3. معالجة الحالة
     const isActive = branch.status === 'active' || branch.status === 'نشط';
@@ -23,7 +23,7 @@ export default function BranchDetailsModal({ isOpen, onClose, branch }) {
         <div className="fixed inset-0 z-50 flex items-center justify-center px-2">
             {/* خلفية معتمة */}
             <div className="absolute inset-0 bg-black/35 backdrop-blur-[2px]" onClick={onClose}></div>
-            
+
             <div className="relative bg-white rounded-2xl max-w-lg w-full p-5 shadow-2xl modal-content border border-surface-container-high z-10">
                 {/* الهيدر */}
                 <div className="flex justify-between items-center border-b border-surface-container-high pb-3">
@@ -50,9 +50,8 @@ export default function BranchDetailsModal({ isOpen, onClose, branch }) {
                     <div className="grid grid-cols-2 gap-3 bg-surface-container-low p-3 rounded-xl">
                         <div>
                             <span className="text-on-surface-variant block text-[10px]">الحالة:</span>
-                            <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold inline-block mt-0.5 ${
-                                isActive ? 'bg-secondary-fixed text-on-secondary-fixed' : 'bg-error-container text-on-error-container'
-                            }`}>
+                            <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold inline-block mt-0.5 ${isActive ? 'bg-secondary-fixed text-on-secondary-fixed' : 'bg-error-container text-on-error-container'
+                                }`}>
                                 {isActive ? 'نشط' : 'غير نشط'}
                             </span>
                         </div>
@@ -65,10 +64,10 @@ export default function BranchDetailsModal({ isOpen, onClose, branch }) {
                         <div className="col-span-2">
                             <span className="text-on-surface-variant block text-[10px]">الموقع / الإحداثيات:</span>
                             {googleMapsUrl ? (
-                                <a 
-                                    href={googleMapsUrl} 
-                                    target="_blank" 
-                                    rel="noopener noreferrer" 
+                                <a
+                                    href={googleMapsUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
                                     className="text-primary font-bold hover:underline flex items-center gap-1 mt-0.5"
                                 >
                                     <span className="material-symbols-outlined text-xs">location_on</span>
@@ -82,10 +81,10 @@ export default function BranchDetailsModal({ isOpen, onClose, branch }) {
                         {branch.website_url && (
                             <div className="col-span-2 border-t border-surface-container-high pt-2">
                                 <span className="text-on-surface-variant block text-[10px]">الموقع الإلكتروني:</span>
-                                <a 
-                                    href={branch.website_url} 
-                                    target="_blank" 
-                                    rel="noopener noreferrer" 
+                                <a
+                                    href={branch.website_url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
                                     className="text-secondary font-bold hover:underline block truncate mt-0.5"
                                 >
                                     {branch.website_url}
