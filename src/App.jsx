@@ -3,71 +3,111 @@ import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import { CartProvider } from "./context/CartContext";
+import { LanguageProvider } from "./context/LanguageContext";
+
+import { CartProvider } from "./context/CartContext";
 
 import Reviews from "./pages/site/Reviews";
 import SiteLayout from "./layouts/SiteLayout";
 import AdminLayout from "./layouts/AdminLayout";
 import Banners from "./pages/admin/Banners";
 
+// ==================== Site Pages ====================
 import Home from "./pages/site/Home";
+import Products from "./pages/site/Products";
+import ProductDetails from "./pages/site/ProductDetails";
 import Cart from "./pages/site/Cart";
 import OrderSuccess from "./pages/site/OrderSuccess";
 
+// ==================== Admin Pages ====================
 import Dashboard from "./pages/admin/Dashboard";
 import Categories from "./pages/admin/Categories";
-import Products from "./pages/admin/Products";
-import Features from "./pages/admin/Features";
+import AdminProducts from "./pages/admin/Products";
 
 export default function App() {
-
     const { i18n } = useTranslation();
 
     useEffect(() => {
-        const lang = i18n.language?.startsWith("en") ? "en" : "ar";
+        const lang = i18n.language?.startsWith("en")
+            ? "en"
+            : "ar";
 
         document.documentElement.lang = lang;
-        document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
+        document.documentElement.dir =
+            lang === "ar" ? "rtl" : "ltr";
     }, [i18n.language]);
 
     return (
         <CartProvider>
             <Router>
-                <Routes>
+                <LanguageProvider>
 
-                    <Route element={<SiteLayout />}>
-                        <Route path="/" element={<Home />} />
-                        <Route path="/reviews" element={<Reviews />} />
-                        <Route path="/cart" element={<Cart />} />
+                    <Routes>
+
+                        {/* ==================== Site ==================== */}
+
+                        <Route element={<SiteLayout />}>
+
+                            {/* الرئيسية */}
+                            <Route
+                                path="/"
+                                element={<Home />}
+                            />
+
+                            {/* صفحة المنتجات */}
+                            <Route
+                                path="/products"
+                                element={<Products />}
+                            />
+
+                            {/* تفاصيل المنتج */}
+                            <Route
+                                path="/products/:id"
+                                element={<ProductDetails />}
+                            />
+
+                            {/* السلة */}
+                            <Route
+                                path="/cart"
+                                element={<Cart />}
+                            />
+
+                            {/* نجاح الطلب */}
+                            <Route
+                                path="/OrderSuccess"
+                                element={<OrderSuccess />}
+                            />
+
+                        </Route>
+
+
+                        {/* ==================== Admin ==================== */}
+
                         <Route
-                            path="/OrderSuccess"
-                            element={<OrderSuccess />}
-                        />
-                    </Route>
+                            path="/admin"
+                            element={<AdminLayout />}
+                        >
 
-                    <Route path="/admin" element={<AdminLayout />}>
-                        <Route index element={<Dashboard />} />
-                        <Route
-                         path="banners"
-                         element={<Banners />}
-                        />
+                            <Route
+                                index
+                                element={<Dashboard />}
+                            />
 
-                        <Route
-                           path="features"
-                           element={<Features />}
-                        />
+                            <Route
+                                path="categories"
+                                element={<Categories />}
+                            />
 
-                        <Route
-                            path="categories"
-                            element={<Categories />}
-                        />
+                            <Route
+                                path="products"
+                                element={<AdminProducts />}
+                            />
 
-                        <Route
-                            path="products"
-                            element={<Products />}
-                        />
-                    </Route>
+                        </Route>
 
-                </Routes>
+                    </Routes>
+
+                </LanguageProvider>
             </Router>
         </CartProvider>
     );
