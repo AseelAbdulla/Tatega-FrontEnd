@@ -4,8 +4,10 @@ import { useTranslation } from "react-i18next";
 
 import { CartProvider } from "./context/CartContext";
 
+import Reviews from "./pages/site/Reviews";
 import SiteLayout from "./layouts/SiteLayout";
 import AdminLayout from "./layouts/AdminLayout";
+import Banners from "./pages/admin/Banners";
 
 import Home from "./pages/site/Home";
 import Cart from "./pages/site/Cart";
@@ -14,6 +16,7 @@ import OrderSuccess from "./pages/site/OrderSuccess";
 import Dashboard from "./pages/admin/Dashboard";
 import Categories from "./pages/admin/Categories";
 import Products from "./pages/admin/Products";
+import Features from "./pages/admin/Features";
 
 export default function App() {
 
@@ -33,6 +36,7 @@ export default function App() {
 
                     <Route element={<SiteLayout />}>
                         <Route path="/" element={<Home />} />
+                        <Route path="/reviews" element={<Reviews />} />
                         <Route path="/cart" element={<Cart />} />
                         <Route
                             path="/OrderSuccess"
@@ -42,6 +46,15 @@ export default function App() {
 
                     <Route path="/admin" element={<AdminLayout />}>
                         <Route index element={<Dashboard />} />
+                        <Route
+                         path="banners"
+                         element={<Banners />}
+                        />
+
+                        <Route
+                           path="features"
+                           element={<Features />}
+                        />
 
                         <Route
                             path="categories"
