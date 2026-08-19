@@ -3,7 +3,6 @@ import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import { CartProvider } from "./context/CartContext";
-import { LanguageProvider } from "./context/LanguageContext";
 
 // Layouts
 import SiteLayout from "./layouts/SiteLayout";
@@ -21,7 +20,6 @@ import Login from "./pages/site/Login";
 // Admin Pages
 import Dashboard from "./pages/admin/Dashboard";
 import Categories from "./pages/admin/Categories";
-import AdminProducts from "./pages/admin/Products";
 import Roles from "./pages/admin/Roles";
 import Users from "./pages/admin/Users";
 import UserDetails from "./pages/admin/UserDetails";
@@ -33,6 +31,9 @@ import OrderHistory from "./pages/admin/OrderHistory";
 import Profile from "./pages/admin/Profile";
 import PaymentMethods from "./pages/admin/PaymentMethods";
 import Password from "./pages/admin/Password";
+import AdminProducts from "./pages/admin/Products";
+import AddProduct from "./pages/admin/AddProduct";
+import EditProduct from "./pages/admin/EditProduct";
 
 export default function App() {
     const { i18n } = useTranslation();
@@ -50,155 +51,161 @@ export default function App() {
     return (
         <CartProvider>
             <Router>
-                <LanguageProvider>
+                <Routes>
 
-                    <Routes>
+                    {/* ==================== Site ==================== */}
+                    <Route element={<SiteLayout />}>
 
-                        {/* ==================== Site ==================== */}
-
-                        <Route element={<SiteLayout />}>
-
-                            {/* الرئيسية */}
-                            <Route
-                                path="/"
-                                element={<Home />}
-                            />
-
-                            {/* المنتجات */}
-                            <Route
-                                path="/products"
-                                element={<Products />}
-                            />
-
-                            {/* تفاصيل المنتج */}
-                            <Route
-                                path="/products/:id"
-                                element={<ProductDetails />}
-                            />
-
-                            {/* السلة */}
-                            <Route
-                                path="/cart"
-                                element={<Cart />}
-                            />
-
-                            {/* نجاح الطلب */}
-                            <Route
-                                path="/OrderSuccess"
-                                element={<OrderSuccess />}
-                            />
-
-                            {/* تسجيل الحساب */}
-                            <Route
-                                path="/register"
-                                element={<Register />}
-                            />
-
-                            {/* تسجيل الدخول */}
-                            <Route
-                                path="/login"
-                                element={<Login />}
-                            />
-
-                        </Route>
-
-
-                        {/* ==================== Admin ==================== */}
-
+                        {/* الرئيسية */}
                         <Route
-                            path="/admin"
-                            element={<AdminLayout />}
-                        >
+                            path="/"
+                            element={<Home />}
+                        />
 
-                            {/* Dashboard */}
-                            <Route
-                                index
-                                element={<Dashboard />}
-                            />
+                        {/* المنتجات */}
+                        <Route
+                            path="/products"
+                            element={<Products />}
+                        />
 
-                            {/* Categories */}
-                            <Route
-                                path="categories"
-                                element={<Categories />}
-                            />
+                        {/* تفاصيل المنتج */}
+                        <Route
+                            path="/products/:id"
+                            element={<ProductDetails />}
+                        />
 
-                            {/* Products */}
-                            <Route
-                                path="products"
-                                element={<AdminProducts />}
-                            />
+                        {/* السلة */}
+                        <Route
+                            path="/cart"
+                            element={<Cart />}
+                        />
 
-                            {/* Roles */}
-                            <Route
-                                path="roles"
-                                element={<Roles />}
-                            />
+                        {/* نجاح الطلب */}
+                        <Route
+                            path="/OrderSuccess"
+                            element={<OrderSuccess />}
+                        />
 
-                            {/* Users */}
-                            <Route
-                                path="users"
-                                element={<Users />}
-                            />
+                        {/* تسجيل الحساب */}
+                        <Route
+                            path="/register"
+                            element={<Register />}
+                        />
 
-                            {/* User Details */}
-                            <Route
-                                path="users/:id"
-                                element={<UserDetails />}
-                            />
+                        {/* تسجيل الدخول */}
+                        <Route
+                            path="/login"
+                            element={<Login />}
+                        />
 
-                            {/* User Address */}
-                            <Route
-                                path="users/:id/address"
-                                element={<Address />}
-                            />
+                    </Route>
 
-                            {/* Edit User */}
-                            <Route
-                                path="users/:id/edit"
-                                element={<UserEdit />}
-                            />
 
-                            {/* International Customers */}
-                            <Route
-                                path="customers/international"
-                                element={<InternationalImport />}
-                            />
+                    {/* ==================== Admin ==================== */}
+                    <Route
+                        path="/admin"
+                        element={<AdminLayout />}
+                    >
 
-                            {/* Local Customers */}
-                            <Route
-                                path="customers/local"
-                                element={<LocalCustomers />}
-                            />
+                        {/* Dashboard */}
+                        <Route
+                            index
+                            element={<Dashboard />}
+                        />
 
-                            {/* Order History */}
-                            <Route
-                                path="order-history"
-                                element={<OrderHistory />}
-                            />
+                        {/* Categories */}
+                        <Route
+                            path="categories"
+                            element={<Categories />}
+                        />
 
-                            {/* Profile */}
-                            <Route
-                                path="profile"
-                                element={<Profile />}
-                            />
+                        {/* Products */}
+                        <Route
+                            path="products"
+                            element={<AdminProducts />}
+                        />
 
-                            {/* Payment Methods */}
-                            <Route
-                                path="payment-methods"
-                                element={<PaymentMethods />}
-                            />
+                        {/* Add Product */}
+                        <Route
+                            path="products/create"
+                            element={<AddProduct />}
+                        />
 
-                            {/* Password */}
-                            <Route
-                                path="profile/password"
-                                element={<Password />}
-                            />
+                        {/* Edit Product */}
+                        <Route
+                            path="products/:id/edit"
+                            element={<EditProduct />}
+                        />
 
-                        </Route>
+                        {/* Roles */}
+                        <Route
+                            path="roles"
+                            element={<Roles />}
+                        />
 
-                    </Routes>
+                        {/* Users */}
+                        <Route
+                            path="users"
+                            element={<Users />}
+                        />
 
-                </LanguageProvider>
+                        {/* User Details */}
+                        <Route
+                            path="users/:id"
+                            element={<UserDetails />}
+                        />
+
+                        {/* User Address */}
+                        <Route
+                            path="users/:id/address"
+                            element={<Address />}
+                        />
+
+                        {/* Edit User */}
+                        <Route
+                            path="users/:id/edit"
+                            element={<UserEdit />}
+                        />
+
+                        {/* International Customers */}
+                        <Route
+                            path="customers/international"
+                            element={<InternationalImport />}
+                        />
+
+                        {/* Local Customers */}
+                        <Route
+                            path="customers/local"
+                            element={<LocalCustomers />}
+                        />
+
+                        {/* Order History */}
+                        <Route
+                            path="order-history"
+                            element={<OrderHistory />}
+                        />
+
+                        {/* Profile */}
+                        <Route
+                            path="profile"
+                            element={<Profile />}
+                        />
+
+                        {/* Payment Methods */}
+                        <Route
+                            path="payment-methods"
+                            element={<PaymentMethods />}
+                        />
+
+                        {/* Password */}
+                        <Route
+                            path="profile/password"
+                            element={<Password />}
+                        />
+
+                    </Route>
+
+                </Routes>
             </Router>
         </CartProvider>
     );
