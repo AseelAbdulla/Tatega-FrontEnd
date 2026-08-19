@@ -18,7 +18,9 @@
     "status": "الحالة",
     "available": "متاح",
     "directions": "الاتجاهات",
-    "defaultBranch": "فرع تعتيقة"
+    "defaultBranch": "فرع تعتيقة",
+    "locateMe" :"تحديد أقرب فرع لي",
+    "locating" :"جاري تحديد موقعك..."
   },
   "nav": {
     "home": "الرئيسية",

@@ -6,13 +6,21 @@ import AdminTopbar from "../components/admin/AdminTopbar";
 
 export default function AdminLayout() {
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    // حالة التحكم بطي القائمة على الشاشات الكبيرة
+    const [isCollapsed, setIsCollapsed] = useState(false);
+
+    const handleToggleCollapse = () => {
+        setIsCollapsed((prev) => !prev);
+    };
 
     return (
-        <div className="admin-layout" dir="rtl">
+        <div className={`admin-layout ${isCollapsed ? "collapsed" : ""}`} dir="rtl">
 
             <AdminSidebar
                 isOpen={sidebarOpen}
                 onClose={() => setSidebarOpen(false)}
+                isCollapsed={isCollapsed}
+                onToggleCollapse={handleToggleCollapse}
             />
 
             <div className="admin-main">
@@ -30,3 +38,4 @@ export default function AdminLayout() {
         </div>
     );
 }
+
