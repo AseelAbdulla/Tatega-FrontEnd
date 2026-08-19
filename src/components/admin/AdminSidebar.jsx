@@ -5,6 +5,7 @@ const menuItems = [
         label: "لوحة التحكم",
         icon: "dashboard",
         path: "/admin",
+        end: true
     },
 
     {
@@ -122,7 +123,7 @@ export default function AdminSidebar({ isOpen, onClose }) {
                 <div className="admin-brand">
 
                     <h1>
-                        متجر تقية
+                        متجر تعتيقة
                     </h1>
 
                     <p>
@@ -146,7 +147,7 @@ export default function AdminSidebar({ isOpen, onClose }) {
                             key={item.path}
                             to={item.path}
                             onClick={onClose}
-                            end={item.path === "/admin"}
+                            end={item.end}
                             className={({ isActive }) =>
                                 `admin-nav-item ${
                                     isActive
@@ -225,7 +226,7 @@ export default function AdminSidebar({ isOpen, onClose }) {
                     <div>
 
                         <strong>
-                            مدير تقية
+                            مدير تعتيقة
                         </strong>
 
                         <small>

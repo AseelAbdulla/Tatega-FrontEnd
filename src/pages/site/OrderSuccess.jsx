@@ -50,7 +50,6 @@ export default function OrderSuccess() {
         ...(order?.pricing || {}),
         shipping_fee: order?.pricing?.shipping_fee ?? order?.shipping_fee ?? order?.shipping_cost ?? 0
     };
-// console.log(order)
     return (
         
         <main className="pt-24 pb-20 px-4 max-w-4xl mx-auto" dir={currentLang === 'ar' ? 'rtl' : 'ltr'}>
