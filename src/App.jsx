@@ -36,7 +36,6 @@ import OrderHistory from "./pages/admin/OrderHistory";
 import Profile from "./pages/admin/Profile";
 import PaymentMethods from "./pages/admin/PaymentMethods";
 import Password from "./pages/admin/Password";
-import AdminProducts from "./pages/admin/Products";
 import AddProduct from "./pages/admin/AddProduct";
 import EditProduct from "./pages/admin/EditProduct";
 

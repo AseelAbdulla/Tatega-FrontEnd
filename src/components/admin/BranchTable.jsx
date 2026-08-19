@@ -1,110 +1,131 @@
-
 import React from 'react';
 
 export default function BranchTable({ branches = [], onView, onEdit, onDelete, onToggleStatus }) {
     
-    // تحويل حالة الباك أند (active/inactive) لستايل التصميم
+    // تحويل حالة الباك أند (active/inactive) لستايل التصميم الخاص بمشروع تعتيقة
     const getStatusBadge = (status) => {
-        const isActive = status === 'active' || status === 'نشط';
+        const isActive = status === 'active' || status === 'نشط' || status === true || status === 1;
         
         return {
             label: isActive ? 'نشط' : 'غير نشط',
             style: isActive 
-                ? 'bg-secondary-fixed text-on-secondary-fixed border-secondary-fixed' 
-                : 'bg-error-container text-on-error-container border-error-container'
+                ? 'bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100' 
+                : 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100'
         };
     };
 
     return (
-        <div className="bg-white rounded-xl card-shadow border border-surface-container-high overflow-hidden">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden font-tajawal">
             <div className="overflow-x-auto">
                 <table className="w-full text-right text-xs">
                     <thead>
-                        <tr className="bg-surface-container-low border-b border-surface-container-high">
-                            <th className="px-3 py-2 text-[10px] font-bold text-secondary">#</th>
-                            <th className="px-3 py-2 text-[10px] font-bold text-secondary">الشعار</th>
-                            <th className="px-3 py-2 text-[10px] font-bold text-secondary">اسم الفرع</th>
-                            <th className="px-3 py-2 text-[10px] font-bold text-secondary hidden sm:table-cell">الإحداثيات / الموقع</th>
-                            <th className="px-3 py-2 text-[10px] font-bold text-secondary hidden md:table-cell">الحالة</th>
-                            <th className="px-3 py-2 text-[10px] font-bold text-secondary hidden lg:table-cell">الترتيب</th>
-                            <th className="px-3 py-2 text-[10px] font-bold text-secondary text-center">إجراءات</th>
+                        <tr className="bg-[#F5E6D2]/40 border-b border-gray-200">
+                            <th className="px-4 py-3 text-[11px] font-bold text-[#24572b]">#</th>
+                            <th className="px-4 py-3 text-[11px] font-bold text-[#24572b]">الشعار</th>
+                            <th className="px-4 py-3 text-[11px] font-bold text-[#24572b]">اسم الفرع / النقطة</th>
+                            <th className="px-4 py-3 text-[11px] font-bold text-[#24572b] hidden sm:table-cell">الإحداثيات / الموقع</th>
+                            <th className="px-4 py-3 text-[11px] font-bold text-[#24572b] hidden md:table-cell">الحالة</th>
+                            <th className="px-4 py-3 text-[11px] font-bold text-[#24572b] hidden lg:table-cell">الترتيب</th>
+                            <th className="px-4 py-3 text-[11px] font-bold text-[#24572b] text-center">إجراءات</th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-surface-container-high">
+                    <tbody className="divide-y divide-gray-100">
                         {branches.length === 0 ? (
                             <tr>
-                                <td colSpan="7" className="text-center py-6 text-on-surface-variant font-bold text-xs">
-                                    لا توجد نقاط بيع مسجلة حالياً
+                                <td colSpan="7" className="text-center py-8 text-gray-500 font-medium text-xs">
+                                    لا توجد نقاط بيع أو فروع مسجلة حالياً
                                 </td>
                             </tr>
                         ) : (
                             branches.map((branch, index) => {
                                 const statusInfo = getStatusBadge(branch.status);
                                 
-                                // معالجة الاسم سواء كان كائن مترجم أو نص عادي
+                                // معالجة الاسم سواء كان كائن مترجم (Multi-language) أو نص عادي
                                 const branchName = typeof branch.name === 'object' 
-                                    ? (branch.name?.ar || branch.name?.en) 
+                                    ? (branch.name?.ar || branch.name?.en || '') 
                                     : branch.name;
 
-                                // رابط الشعار القادم من Laravel Storage
-                                const logoUrl = branch.logo ? (branch.logo.startsWith('http') ? branch.logo : '/storage/${branch.logo}') : (branch.logo_url || null);
+                                // تصحيح رابط الشعار القادم من Laravel Storage
+                                const logoUrl = branch.logo 
+                                    ? (branch.logo.startsWith('http') ? branch.logo : `/storage/${branch.logo}`) 
+                                    : (branch.logo_url || null);
 
                                 return (
-                                    <tr key={branch.id} className="row-hover">
-                                        <td className="px-3 py-2.5 font-bold text-on-surface">{index + 1}</td>
+                                    <tr key={branch.id || index} className="hover:bg-gray-50/80 transition-colors">
+                                        <td className="px-4 py-3 font-bold text-gray-600">{index + 1}</td>
                                         
                                         {/* عرض الشعار */}
-                                        <td className="px-3 py-2.5">
+                                        <td className="px-4 py-3">
                                             {logoUrl ? (
                                                 <img 
                                                     src={logoUrl} 
                                                     alt={branchName} 
-                                                    className="w-7 h-7 rounded-full object-cover border border-surface-container-high" 
+                                                    className="w-8 h-8 rounded-full object-cover border border-gray-200 shadow-sm" 
                                                 />
                                             ) : (
-                                                <div className="w-7 h-7 rounded-full bg-surface-container flex items-center justify-center text-[10px] font-bold text-primary">
+                                                <div className="w-8 h-8 rounded-full bg-[#24572b]/10 border border-[#24572b]/20 flex items-center justify-center text-xs font-bold text-[#24572b]">
                                                     {branchName ? branchName.charAt(0) : 'P'}
                                                 </div>
                                             )}
                                         </td>
 
-                                        <td className="px-3 py-2.5 font-bold text-on-surface">
-                                            {branchName}
-                                            {branch.slogan && <span className="block text-[9px] font-normal text-gray-400">{branch.slogan}</span>}
+                                        {/* الاسم والشعار اللفظي */}
+                                        <td className="px-4 py-3">
+                                            <span className="font-bold text-gray-800 block text-xs">{branchName}</span>
+                                            {branch.slogan && <span className="block text-[10px] font-normal text-gray-400 mt-0.5">{branch.slogan}</span>}
                                         </td>
 
                                         {/* الإحداثيات */}
-                                        <td className="px-3 py-2.5 text-on-surface-variant hidden sm:table-cell font-mono text-[12px]">
-                                            {branch.lat && branch.lng ? `${branch.lat}, ${branch.lng}` : (branch.location || 'غير محدد')}
+                                        <td className="px-4 py-3 text-gray-600 hidden sm:table-cell font-mono text-[11px]">
+                                            {branch.lat && branch.lng ? (
+                                                <span className="bg-gray-100 px-2 py-0.5 rounded text-gray-700">
+                                                    {branch.lat}, {branch.lng}
+                                                </span>
+                                            ) : (
+                                                <span className="text-gray-400 font-sans">{branch.location || 'غير محدد'}</span>
+                                            )}
                                         </td>
 
                                         {/* تغيير الحالة بالنقر المباشر */}
-                                        <td className="px-3 py-2.5 hidden md:table-cell">
+                                        <td className="px-4 py-3 hidden md:table-cell">
                                             <button 
                                                 type="button"
                                                 onClick={() => onToggleStatus && onToggleStatus(branch.id)}
-                                                className={`px-2 py-0.5 text-[9px] rounded-full border transition hover:opacity-80 cursor-pointer ${statusInfo.style}`}
+                                                className={`px-2.5 py-0.5 text-[10px] font-semibold rounded-full border transition cursor-pointer ${statusInfo.style}`}
                                                 title="انقر لتغيير الحالة"
                                             >
                                                 {statusInfo.label}
                                             </button>
                                         </td>
 
-                                        <td className="px-3 py-2.5 hidden lg:table-cell font-bold text-secondary">
+                                        {/* الترتيب */}
+                                        <td className="px-4 py-3 hidden lg:table-cell font-bold text-gray-600">
                                             {branch.sort_order ?? 0}
                                         </td>
 
                                         {/* الإجراءات */}
-                                        <td className="px-3 py-2.5">
-                                            <div className="flex items-center justify-center gap-1.5">
-                                                <button onClick={() => onView(branch)} className="p-1 hover:bg-surface-container rounded-full transition" title="عرض التفاصيل والخريطة">
-                                                    <span className="material-symbols-outlined text-sm text-primary">visibility</span>
+                                        <td className="px-4 py-3">
+                                            <div className="flex items-center justify-center gap-1">
+                                                <button 
+                                                    onClick={() => onView && onView(branch)} 
+                                                    className="p-1.5 hover:bg-[#24572b]/10 text-[#24572b] rounded-lg transition" 
+                                                    title="عرض التفاصيل والخريطة"
+                                                >
+                                                    <span className="material-symbols-outlined text-base block">visibility</span>
                                                 </button>
-                                                <button onClick={() => onEdit(branch)} className="p-1 hover:bg-surface-container rounded-full transition" title="تعديل">
-                                                    <span className="material-symbols-outlined text-sm text-secondary">edit</span>
+                                                <button 
+                                                    onClick={() => onEdit && onEdit(branch)} 
+                                                    className="p-1.5 hover:bg-amber-50 text-amber-600 rounded-lg transition" 
+                                                    title="تعديل"
+                                                >
+                                                    <span className="material-symbols-outlined text-base block">edit</span>
                                                 </button>
-                                                <button onClick={() => onDelete(branch.id)} className="p-1 hover:bg-surface-container rounded-full transition" title="حذف">
-                                                    <span className="material-symbols-outlined text-sm text-error">delete</span>
+                                                <button 
+                                                    onClick={() => onDelete && onDelete(branch.id)} 
+                                                    className="p-1.5 hover:bg-rose-50 text-rose-600 rounded-lg transition" 
+                                                    title="حذف"
+                                                >
+                                                    <span className="material-symbols-outlined text-base block">delete</span>
                                                 </button>
                                             </div>
                                         </td>
@@ -118,3 +139,4 @@ export default function BranchTable({ branches = [], onView, onEdit, onDelete, o
         </div>
     );
 }
+

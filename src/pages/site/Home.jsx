@@ -5,7 +5,7 @@ import StoreLocator from '../../components/site/StoreLocator';
 import BannerCarousel from "../../components/site/BannerCarousel";
 import Reviews from "../../components/site/Reviews";
 import BestSell from "../../components/site/BestSell";
-
+import HomeFeatures from "../../components/site/HomeFeatures";
 export default function Home() {
 
   return (
@@ -13,8 +13,8 @@ export default function Home() {
       <BannerCarousel />
 
       <BestSell />
-      
-
+      <HomeFeatures />
+    
       {/* Store Locator */}
       <StoreLocator />
       <Reviews />
