@@ -1,36 +1,24 @@
+import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom"; // إضافة استيراد Link
+
+import StoreLocator from '../../components/site/StoreLocator';
 import BannerCarousel from "../../components/site/BannerCarousel";
-import HomeFeatures from "../../components/site/HomeFeatures";
-import FeaturedProducts from "../../components/site/FeaturedProducts";
-import StoreLocator from "../../components/site/StoreLocator";
 import Reviews from "../../components/site/Reviews";
+import BestSell from "../../components/site/BestSell";
 
 export default function Home() {
-    return (
-        <div>
-            {/* =========================
-                Banner
-            ========================== */}
-            <BannerCarousel />
 
-            {/* =========================
-                Features
-            ========================== */}
-            <HomeFeatures />
+  return (
+    <div>
+      <BannerCarousel />
 
-            {/* =========================
-                Featured Products
-            ========================== */}
-            <FeaturedProducts />
+      <BestSell />
+      
 
-            {/* =========================
-                Store Locator
-            ========================== */}
-            <StoreLocator />
+      {/* Store Locator */}
+      <StoreLocator />
+      <Reviews />
 
-            {/* =========================
-                Reviews
-            ========================== */}
-            <Reviews />
-        </div>
-    );
+    </div>
+  );
 }

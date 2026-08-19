@@ -90,10 +90,9 @@ function BannerCarousel() {
                             transition-opacity
                             duration-1000
                             ease-in-out
-                            ${
-                                isActive
-                                    ? 'opacity-100 z-10'
-                                    : 'opacity-0 z-0 pointer-events-none'
+                            ${isActive
+                                ? 'opacity-100 z-10'
+                                : 'opacity-0 z-0 pointer-events-none'
                             }
                         `}
                     >
@@ -101,16 +100,17 @@ function BannerCarousel() {
                             Image
                         ========================== */}
 
+
                         <img
-                            src={banner.image_url}
+                            src={
+                                banner.image_url
+                                    ? banner.image_url
+                                    : `http://127.0.0.1:8000/storage/${banner.image_path}`
+                            }
                             alt={slogan}
-                            className="
-                                absolute inset-0
-                                w-full h-full
-                                object-cover
-                                opacity-70
-                            "
+                            className="absolute inset-0 w-full h-full object-cover opacity-70"
                         />
+
 
                         {/* =========================
                             Dark Gradient
@@ -119,7 +119,7 @@ function BannerCarousel() {
                         <div
                             className="
                                 absolute inset-0
-                                bg-gradient-to-t
+                                bg-linear-to-t
                                 from-black/70
                                 via-black/30
                                 to-transparent
@@ -147,10 +147,9 @@ function BannerCarousel() {
                                     duration-700
                                     ease-out
                                     delay-300
-                                    ${
-                                        isActive
-                                            ? 'translate-y-0 opacity-100'
-                                            : 'translate-y-5 opacity-0'
+                                    ${isActive
+                                        ? 'translate-y-0 opacity-100'
+                                        : 'translate-y-5 opacity-0'
                                     }
                                 `}
                             >
@@ -173,7 +172,7 @@ function BannerCarousel() {
                                         className="
                                             h-0.5
                                             w-12
-                                            bg-[#F07A26]
+                                            bg-\[\#F07A26\]
                                         "
                                     />
                                 </div>
@@ -225,8 +224,8 @@ function BannerCarousel() {
                                     <button
                                         type="button"
                                         className="
-                                            bg-[#F07A26]
-                                            hover:bg-[#4E7A3C]
+                                            bg-\[\#F07A26\]
+                                            hover\:bg-\[\#4E7A3C\]:hover
                                             text-white
                                             px-8
                                             py-4
@@ -281,10 +280,9 @@ function BannerCarousel() {
                                 rounded-full
                                 transition-all
                                 duration-300
-                                ${
-                                    index === currentIndex
-                                        ? 'w-8 bg-[#F07A26]'
-                                        : 'w-2.5 bg-white/60 hover:bg-white'
+                                ${index === currentIndex
+                                    ? 'w-8 bg-\[\#F07A26\]'
+                                    : 'w-2.5 bg-white/60 hover:bg-white'
                                 }
                             `}
                         />

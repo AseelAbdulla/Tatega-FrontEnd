@@ -255,8 +255,8 @@ export default function Roles() {
                 ...prev,
                 permissions: exists
                     ? prev.permissions.filter(
-                          (item) => item !== permission
-                      )
+                        (item) => item !== permission
+                    )
                     : [...prev.permissions, permission],
             };
         });
@@ -283,9 +283,9 @@ export default function Roles() {
                 prev.map((role) =>
                     role.id === editingRole.id
                         ? {
-                              ...role,
-                              ...formData,
-                          }
+                            ...role,
+                            ...formData,
+                        }
                         : role
                 )
             );
@@ -557,7 +557,7 @@ export default function Roles() {
 
                                     <td className="px-6 py-5 text-center">
                                         {role.status ===
-                                        "active" ? (
+                                            "active" ? (
                                             <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-green-100 text-green-700 text-sm font-bold">
                                                 <span className="w-2 h-2 bg-green-600 rounded-full" />
                                                 نشط

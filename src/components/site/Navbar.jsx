@@ -1,16 +1,31 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
+import { Link, NavLink, useLocation } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 
 export default function Navbar() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
     const { t, i18n } = useTranslation();
+    const location = useLocation();
 
     const currentLang = i18n.language?.startsWith('en') ? 'en' : 'ar';
-
     const { cartCount } = useCart();
+
+    // تنسيق كلاسات رابط الـ NavLink (للصفحات الخارجية مثل / و /products)
+    const getNavLinkClass = ({ isActive }) =>
+        `font-label-sm transition-colors ${
+            isActive
+                ? 'text-accent-terracotta font-bold border-b-2 border-accent-terracotta pb-1'
+                : 'text-on-surface-variant hover:text-accent-terracotta'
+        }`;
+
+    // تنسيق كلاسات روابط الجوال (Mobile NavLink)
+    const getMobileNavLinkClass = ({ isActive }) =>
+        `py-1 transition-colors ${
+            isActive
+                ? 'text-accent-terracotta font-bold'
+                : 'text-on-surface hover:text-accent-terracotta'
+        }`;
 
     return (
         <>
@@ -27,7 +42,7 @@ export default function Navbar() {
                             >
                                 <img
                                     src="/favicon.svg"
-                                    alt=""
+                                    alt="Logo"
                                     className="h-20 w-auto object-contain"
                                 />
                             </Link>
@@ -35,19 +50,20 @@ export default function Navbar() {
                             {/* روابط الشاشات الكبيرة */}
                             <div className="hidden lg:flex gap-5 items-center mr-8">
 
-                                <Link
+                                <NavLink
                                     to="/"
-                                    className="text-on-surface-variant font-label-sm hover:text-accent-terracotta transition-colors"
+                                    end
+                                    className={getNavLinkClass}
                                 >
                                     {t("navbar.home")}
-                                </Link>
+                                </NavLink>
 
-                                <Link
+                                <NavLink
                                     to="/products"
-                                    className="text-on-surface-variant font-label-sm hover:text-accent-terracotta transition-colors"
+                                    className={getNavLinkClass}
                                 >
                                     {t("navbar.products")}
-                                </Link>
+                                </NavLink>
 
                                 <a
                                     href="#categories"
@@ -72,7 +88,7 @@ export default function Navbar() {
 
                                 <a
                                     href="#reviews"
-                                    className="text-accent-terracotta text-xs font-bold border-b-2 border-accent-terracotta pb-1"
+                                    className="text-on-surface-variant font-label-sm hover:text-accent-terracotta transition-colors"
                                 >
                                     {t("navbar.reviews")}
                                 </a>
@@ -123,21 +139,29 @@ export default function Navbar() {
 
                             <div className="flex items-center gap-3">
 
-                                <Link
+                                <NavLink
                                     to="/login"
-                                    className="material-symbols-outlined text-primary hover:text-accent-terracotta transition-colors"
+                                    className={({ isActive }) =>
+                                        `material-symbols-outlined transition-colors ${
+                                            isActive ? 'text-accent-terracotta font-bold' : 'text-primary hover:text-accent-terracotta'
+                                        }`
+                                    }
                                 >
                                     person
-                                </Link>
+                                </NavLink>
 
                                 <div className="relative">
 
-                                    <Link
+                                    <NavLink
                                         to="/cart"
-                                        className="material-symbols-outlined text-primary"
+                                        className={({ isActive }) =>
+                                            `material-symbols-outlined transition-colors ${
+                                                isActive ? 'text-accent-terracotta font-bold' : 'text-primary hover:text-accent-terracotta'
+                                            }`
+                                        }
                                     >
                                         shopping_cart
-                                    </Link>
+                                    </NavLink>
 
                                     {cartCount > 0 && (
                                         <span className="absolute -top-1.5 -right-1.5 bg-accent-terracotta text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full font-bold">
@@ -151,7 +175,7 @@ export default function Navbar() {
                                 <button
                                     type="button"
                                     onClick={() => setMobileMenuOpen(true)}
-                                    className="lg:hidden material-symbols-outlined text-primary text-3xl p-2 rounded-lg hover:bg-black/5 transition-colors focus:outline-none"
+                                    className="lg:!hidden material-symbols-outlined text-primary text-3xl p-2 rounded-lg hover:bg-black/5 transition-colors focus:outline-none"
                                 >
                                     menu
                                 </button>
@@ -186,21 +210,22 @@ export default function Navbar() {
 
                         <div className="flex flex-col gap-4 font-medium">
 
-                            <Link
+                            <NavLink
                                 to="/"
+                                end
                                 onClick={() => setMobileMenuOpen(false)}
-                                className="text-on-surface hover:text-accent-terracotta py-1"
+                                className={getMobileNavLinkClass}
                             >
                                 {t("navbar.home")}
-                            </Link>
+                            </NavLink>
 
-                            <Link
+                            <NavLink
                                 to="/products"
                                 onClick={() => setMobileMenuOpen(false)}
-                                className="text-on-surface hover:text-accent-terracotta py-1"
+                                className={getMobileNavLinkClass}
                             >
                                 {t("navbar.products")}
-                            </Link>
+                            </NavLink>
 
                             <a
                                 href="#categories"
@@ -229,7 +254,7 @@ export default function Navbar() {
                             <a
                                 href="#reviews"
                                 onClick={() => setMobileMenuOpen(false)}
-                                className="text-accent-terracotta font-bold py-1"
+                                className="text-on-surface hover:text-accent-terracotta py-1"
                             >
                                 {t("navbar.reviews")}
                             </a>
@@ -249,3 +274,4 @@ export default function Navbar() {
         </>
     );
 }
+

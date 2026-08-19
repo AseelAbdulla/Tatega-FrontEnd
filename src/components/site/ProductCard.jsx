@@ -1,12 +1,15 @@
-import { useTranslation } from "react-i18next";
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+
 import { useNavigate } from "react-router-dom";
 
-export default function ProductCard({ product, isAuthenticated, onAddToCart }) {
+export default function ProductCard({ product }) {
     const { i18n } = useTranslation();
     const navigate = useNavigate();
 
-    const lang = i18n.language === "en" ? "en" : "ar";
+    const lang = i18n.language?.startsWith("en") ? "en" : "ar";
 
+    // استخراج بيانات المنتج
     const productName =
         product?.name?.[lang] ||
         product?.name?.ar ||
@@ -14,153 +17,83 @@ export default function ProductCard({ product, isAuthenticated, onAddToCart }) {
         "";
 
     const images = product?.images || [];
-
     const mainImage =
+        product?.main_image ||
         images.find((image) => image.is_main)?.image ||
         images[0]?.image ||
         "/images/product-placeholder.png";
 
-    const hasDiscount =
-        product.has_discount &&
-        product.discount_price !== null;
+    // الحصول على أقل سعر متاح (بداية السعر)
+    const minPrice =
+        product?.units?.length > 0
+            ? Math.min(...product.units.map((u) => parseFloat(u.price)))
+            : product?.price;
 
-    const price = hasDiscount
-        ? product.discount_price
-        : product.price;
-
-    const oldPrice = hasDiscount
-        ? product.price
-        : null;
-
-    const isOutOfStock =
-        product.stock !== undefined &&
-        product.stock <= 0;
-
-    const handleAddToCart = () => {
-        if (!isAuthenticated) {
-            navigate("/login");
-            return;
-        }
-
-        onAddToCart(product);
+    const handleViewDetails = () => {
+        navigate(`/products/${product.id}`);
     };
 
     return (
-        <div className="group bg-white rounded-2xl shadow-sm hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col h-full">
-
-            {/* Image */}
+        <div className="group bg-white rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col h-full">
+            {/* الصورة - عند الضغط عليها تذهب للتفاصيل */}
             <div
                 className="relative aspect-square overflow-hidden bg-[#f3f4ed] cursor-pointer"
-                onClick={() => navigate(`/products/${product.id}`)}
+                onClick={handleViewDetails}
             >
-
-                <img
-                    src={mainImage}
-                    alt={productName}
-                    className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ${
-                        isOutOfStock ? "opacity-50" : ""
-                    }`}
-                />
-
-                {/* Discount */}
-                {hasDiscount && !isOutOfStock && (
-                    <div className="absolute top-3 right-3">
-                        <div className="flex items-center gap-1 px-3 py-1 rounded-full bg-[#F07A26] text-white text-[10px] font-bold shadow-sm">
-                            <span className="material-symbols-outlined text-[12px]">
-                                local_offer
-                            </span>
-
-                            <span>
-                                {lang === "ar"
-                                    ? "خصم"
-                                    : "Sale"}
-                            </span>
-                        </div>
+                {mainImage ? (
+                    <img
+                        src={mainImage}
+                        alt={productName}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                ) : (
+                    <div className="w-full h-full flex items-center justify-center text-gray-300">
+                        <span className="material-symbols-outlined text-6xl">
+                            image
+                        </span>
                     </div>
                 )}
-
-                {/* Out of stock */}
-                {isOutOfStock && (
-                    <div className="absolute top-3 right-3">
-                        <div className="flex items-center gap-1 px-3 py-1 rounded-full bg-[#414940] text-white text-[10px] font-bold">
-                            <span className="material-symbols-outlined text-[12px]">
-                                block
-                            </span>
-
-                            {lang === "ar"
-                                ? "نفد المخزون"
-                                : "Out of Stock"}
-                        </div>
-                    </div>
-                )}
-
             </div>
 
-            {/* Content */}
+            {/* محتوى الكرت */}
             <div className="p-5 flex flex-col flex-1">
-
                 <h3
-                    onClick={() => navigate(`/products/${product.id}`)}
-                    className="font-bold text-base text-[#2A2A2A] mb-2 cursor-pointer group-hover:text-[#24572b] transition-colors"
+                    onClick={handleViewDetails}
+                    className="font-bold text-base text-[#2A2A2A] mb-2 cursor-pointer hover:text-[#24572b] transition-colors"
                 >
                     {productName}
                 </h3>
 
-                {/* Category */}
-                {product.category && (
-                    <p className="text-xs text-[#71796f] mb-4">
-                        {product.category.name?.[lang] ||
-                            product.category.name?.ar ||
-                            product.category.name?.en}
+                {/* التصنيف إن وجد */}
+                {product?.category && (
+                    <p className="text-xs text-gray-400 mb-3">
+                        {typeof product.category.name === "object"
+                            ? product.category.name?.[lang] ||
+                              product.category.name?.ar ||
+                              product.category.name?.en
+                            : product.category.name}
                     </p>
                 )}
 
-                {/* Price */}
-                <div className="mt-auto">
+                {/* عرض السعر */}
+                <div className="mt-auto pt-2">
+                    <p className="text-[#71796f] text-xs mb-1">
+                        {lang === "ar" ? "يبدأ من" : "Starting from"}
+                    </p>
+                    <p className="text-[#24572b] font-bold text-lg mb-4">
+                        {minPrice} {lang === "ar" ? "ر.س" : "SAR"}
+                    </p>
 
-                    <div className="flex items-center gap-2 mb-4">
-
-                        <p className="text-[#24572b] font-bold text-lg">
-                            {price} ر.س
-                        </p>
-
-                        {oldPrice && (
-                            <p className="text-[#71796f] text-xs line-through opacity-60">
-                                {oldPrice} ر.س
-                            </p>
-                        )}
-
-                    </div>
-
-                    {/* Add to cart */}
-                    {isOutOfStock ? (
-                        <button
-                            disabled
-                            className="w-full py-3 bg-[#d9dbd4] text-[#71796f] rounded-xl font-bold flex items-center justify-center gap-2 cursor-not-allowed"
-                        >
-                            <span className="material-symbols-outlined text-[18px]">
-                                remove_shopping_cart
-                            </span>
-
-                            {lang === "ar"
-                                ? "غير متوفر"
-                                : "Unavailable"}
-                        </button>
-                    ) : (
-                        <button
-                            onClick={handleAddToCart}
-                            className="w-full py-3 bg-[#F07A26] hover:bg-[#4E7A3C] text-white rounded-xl font-bold flex items-center justify-center gap-2 active:scale-95 transition-all"
-                        >
-                            <span className="material-symbols-outlined text-[18px]">
-                                add_shopping_cart
-                            </span>
-
-                            {lang === "ar"
-                                ? "أضف للسلة"
-                                : "Add to Cart"}
-                        </button>
-                    )}
-
+                    {/* زر عرض التفاصيل */}
+                    <button
+                        onClick={handleViewDetails}
+                        className="w-full py-3 bg-[#4E7A3C] hover:bg-[#24572b] text-white rounded-xl font-bold flex items-center justify-center gap-2 active:scale-95 transition-all"
+                    >
+                        <span className="material-symbols-outlined text-[18px]">
+                            visibility
+                        </span>
+                        {lang === "ar" ? "عرض التفاصيل" : "View Details"}
+                    </button>
                 </div>
             </div>
         </div>

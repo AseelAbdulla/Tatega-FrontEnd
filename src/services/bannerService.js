@@ -14,18 +14,26 @@ const bannerService = {
     },
 
     createBanner: async (formData) => {
-        const response = await api.post('/banners', formData);
+        const response = await api.post('/banners', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
 
         return response.data;
     },
 
     updateBanner: async (id, formData) => {
-        formData.append('_method', 'PUT');
+        // التأكد من عدم تكرار إضافة _method إذا كانت موجودة مسبقاً
+        if (!formData.has('_method')) {
+            formData.append('_method', 'PUT');
+        }
 
-        const response = await api.post(
-            `/banners/${id}`,
-            formData
-        );
+        const response = await api.post(`/banners/${id}`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
 
         return response.data;
     },
