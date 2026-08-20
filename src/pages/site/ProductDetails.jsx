@@ -27,6 +27,15 @@ export default function ProductDetails() {
         return `${API_URL}/${path.replace(/^\//, "")}`;
     };
 
+    const getProductImages = (productData) => {
+        const images = Array.isArray(productData?.images) ? productData.images : [];
+        return images.map((image) => ({
+            id: image.id,
+            url: getFullImageUrl(image.image || image.image_url || image.url || image.image_path),
+            isMain: image.is_main === true || image.is_main === 1 || image.is_main === "1",
+        })).filter((image) => image.url);
+    };
+
     // دالة شاملة لفك وتشفير حقول الـ JSON المترجمة (اسم الوحدة، اسم المنتج، ...إلخ)
     const getLocalizedValue = (data) => {
         if (!data) return "";
@@ -37,7 +46,7 @@ export default function ProductDetails() {
         if (typeof data === "string") {
             try {
                 parsed = JSON.parse(data);
-            } catch (e) {
+            } catch {
                 // إذا لم تكن JSON وتصادفت كـ String عادي، أرجعها كما هي
                 return data;
             }
@@ -68,18 +77,16 @@ export default function ProductDetails() {
 
                 setProduct(productData);
 
+                const productImages = getProductImages(productData);
+                const mainImage = productImages.find((image) => image.isMain) || productImages[0];
+                setSelectedImage(mainImage?.url || "/images/product-placeholder.png");
+
                 // تحديد أول وحدة تلقائياً إذا توفرت
                 const availableUnits = productData.units || productData.product_units || [];
                 if (availableUnits.length > 0) {
                     setSelectedUnitId(availableUnits[0].id);
                 }
 
-                const getImages = () => {
-                    if (!product?.images || product.images.length === 0) {
-                        return ["/images/product-placeholder.png"];
-                    }
-                    return product.images.map((img) => getFullImageUrl(img.image || img.url));
-                };
             } catch (err) {
                 console.error(err);
                 setError(
@@ -103,13 +110,18 @@ export default function ProductDetails() {
 
     const getActivePrice = () => {
         if (unitsList.length > 0 && selectedUnitId) {
-            const activeUnit = unitsList.find((u) => u.id === selectedUnitId);
-            if (activeUnit && activeUnit.price) return activeUnit.price;
+            const activeUnit = unitsList.find((u) => String(u.id) === String(selectedUnitId));
+            if (activeUnit && activeUnit.price !== null && activeUnit.price !== undefined) {
+                return Number(activeUnit.price);
+            }
         }
         return product?.has_discount && product?.discount_price
-            ? product.discount_price
-            : product?.price || product?.base_price;
+            ? Number(product.discount_price)
+            : Number(product?.price ?? product?.base_price ?? 0);
     };
+
+    const totalPrice = Number(getActivePrice() || 0) * quantity;
+    const productImages = getProductImages(product);
 
     const handleAddToCart = async () => {
         const token = localStorage.getItem("token");
@@ -174,55 +186,68 @@ export default function ProductDetails() {
 
     return (
         <div className="min-h-screen bg-[#F5E6D2] py-10 px-4" dir={currentLanguage === "ar" ? "rtl" : "ltr"}>
-            <div className="max-w-7xl mx-auto bg-white rounded-3xl p-6 md:p-10 shadow-sm">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="max-w-7xl mx-auto bg-white rounded-3xl p-5 md:p-10 shadow-sm">
+                <div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-[minmax(0,1.1fr)_minmax(360px,0.9fr)]">
                     {/* Image Section */}
-                    <div>
-                        <div className="aspect-square rounded-2xl overflow-hidden bg-gray-100">
+                    <div className="min-w-0">
+                        <div className="relative flex h-[360px] items-center justify-center overflow-hidden rounded-2xl bg-[#f5f1e9] md:h-[520px]">
                             <img
-                                src={selectedImage || "/images/product-placeholder.png"}
+                                src={selectedImage}
                                 alt={getProductName()}
-                                className="w-full h-full object-cover"
+                                className="h-full w-full object-contain object-center"
+                                onError={(event) => {
+                                    event.currentTarget.src = "/images/product-placeholder.png";
+                                }}
                             />
                         </div>
+
+                        {productImages.length > 0 && (
+                            <div className="mt-4 grid grid-cols-4 gap-3 sm:grid-cols-5">
+                                {productImages.map((image) => (
+                                    <button
+                                        key={image.id || image.url}
+                                        type="button"
+                                        onClick={() => setSelectedImage(image.url)}
+                                        className={`h-20 overflow-hidden rounded-xl border-2 bg-[#f5f1e9] transition md:h-24 ${selectedImage === image.url ? "border-[#F07A26] ring-2 ring-[#F07A26]/20" : "border-transparent hover:border-[#4E7A3C]"}`}
+                                        aria-label={image.isMain ? "Main product image" : "Product image"}
+                                    >
+                                        <img src={image.url} alt="" className="h-full w-full object-contain" />
+                                    </button>
+                                ))}
+                            </div>
+                        )}
                     </div>
 
                     {/* Product Info Section */}
                     <div className="flex flex-col justify-center">
                         <h1 className="text-3xl font-bold text-gray-900">{getProductName()}</h1>
 
-                        <div className="mt-4 flex items-center gap-3">
+                        <div className="mt-4 flex flex-wrap items-end gap-3">
                             <span className="text-3xl font-bold text-[#24572B]">
-                                {getActivePrice()} {currentLanguage === "ar" ? "ريال" : "YER"}
+                                {getActivePrice().toFixed(2)} {currentLanguage === "ar" ? "ريال" : "YER"}
+                            </span>
+                            <span className="text-sm text-gray-500">
+                                {currentLanguage === "ar" ? "للوحدة" : "per unit"}
                             </span>
                         </div>
 
-                        {/* 📦 قائمة اختيار الوحدة المنسدلة (Dropdown) */}
                         <div className="mt-6">
-                            <label htmlFor="unit-select" className="block mb-2 text-sm font-bold text-gray-900">
+                            <label htmlFor="unit-select" className="mb-2 block text-sm font-bold text-gray-900">
                                 {currentLanguage === "ar" ? "اختر الوحدة / التعبئة" : "Select Unit"}
                             </label>
-
-                            {unitsList.length > 0 ? (
+                            {unitsList.length > 0 && (
                                 <select
                                     id="unit-select"
                                     value={selectedUnitId || ""}
-                                    onChange={(e) => setSelectedUnitId(Number(e.target.value))}
-                                    className="w-full md:w-80 p-3 bg-white border border-gray-300 rounded-xl text-gray-800 font-medium focus:ring-2 focus:ring-[#F07A26] focus:border-[#F07A26] outline-none transition shadow-sm cursor-pointer"
+                                    onChange={(event) => setSelectedUnitId(event.target.value)}
+                                    className="w-full rounded-xl border border-gray-300 bg-white p-3 font-medium text-gray-800 shadow-sm outline-none transition focus:border-[#F07A26] focus:ring-2 focus:ring-[#F07A26] md:w-80"
                                 >
                                     {unitsList.map((unit) => (
                                         <option key={unit.id} value={unit.id}>
-                                            {getLocalizedValue(unit.unit_name)}
-
+                                            {getLocalizedValue(unit.unit_name)} - {Number(unit.price).toFixed(2)}
                                         </option>
                                     ))}
                                 </select>
-                            ) : (
-                                <p className="text-sm text-red-500 bg-red-50 p-3 rounded-lg border border-red-200">
-                                    {currentLanguage === "ar"
-                                        ? "تنبيه: لا توجد وحدات متوفرة لهذا المنتج"
-                                        : "Warning: No units available for this product"}
-                                </p>
                             )}
                         </div>
 
@@ -236,7 +261,7 @@ export default function ProductDetails() {
                             <label className="block mb-2 font-bold text-gray-900">
                                 {currentLanguage === "ar" ? "الكمية" : "Quantity"}
                             </label>
-                            <div className="flex items-center w-fit border rounded-xl overflow-hidden">
+                            <div className="flex w-fit items-center overflow-hidden rounded-xl border">
                                 <button
                                     type="button"
                                     onClick={() => setQuantity((q) => (q > 1 ? q - 1 : 1))}
@@ -253,12 +278,20 @@ export default function ProductDetails() {
                                     +
                                 </button>
                             </div>
+                            <div className="mt-4 rounded-xl bg-[#f3f4ed] p-4">
+                                <div className="flex items-center justify-between gap-4 text-sm text-gray-600">
+                                    <span>{currentLanguage === "ar" ? `الإجمالي (${quantity})` : `Total (${quantity})`}</span>
+                                    <strong className="text-2xl text-[#24572B]">
+                                        {totalPrice.toFixed(2)} {currentLanguage === "ar" ? "ريال" : "YER"}
+                                    </strong>
+                                </div>
+                            </div>
                         </div>
 
                         {/* Add Button */}
                         <button
                             type="button"
-                            disabled={addingToCart || unitsList.length === 0}
+                            disabled={addingToCart || (unitsList.length > 0 && !selectedUnitId)}
                             onClick={handleAddToCart}
                             className="mt-8 w-full rounded-xl bg-[#F07A26] py-4 text-white font-bold hover:bg-[#4E7A3C] transition disabled:bg-gray-300"
                         >

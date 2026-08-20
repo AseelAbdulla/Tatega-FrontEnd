@@ -1,21 +1,59 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router-dom"; // إضافة استيراد Link
-
+import { Link } from "react-router-dom";
+import { getProducts } from "../../services/productService";
 
 function BestSell() {
     // استخراج دالة الترجمة t واللغة الحالية
     const { t, i18n } = useTranslation();
-    const currentLanguage = i18n.language?.startsWith("en") ? "en" : "ar";
+    const currentLanguage = i18n.resolvedLanguage?.startsWith("en") ? "en" : "ar";
+    const [products, setProducts] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
 
-    // تحذير: يجب عليك جلب البيانات أو تعريف هذه المتغيرات/الدوال (State / Helpers)
-    const loading = false; // استبدلها بالحالة الخاصة بك
-    const error = null;    // استبدلها بالحالة الخاصة بك
-    const products = [];   // استبدلها بمصفوفة المنتجات الخاصة بك
+    useEffect(() => {
+        let isMounted = true;
 
-    const getMainImage = (product) => product?.image || "/images/product-placeholder.png";
-    const getProductName = (product) => currentLanguage === "ar" ? product?.name_ar : product?.name_en;
-    const handleAddToCart = (product) => { console.log("Added to cart", product); };
+        const loadProducts = async () => {
+            try {
+                setLoading(true);
+                setError("");
+                const result = await getProducts();
+                if (isMounted) setProducts(Array.isArray(result) ? result.slice(0, 8) : []);
+            } catch (requestError) {
+                console.error("Products Error:", requestError);
+                if (isMounted) setError(t("products.errors.load"));
+            } finally {
+                if (isMounted) setLoading(false);
+            }
+        };
+
+        loadProducts();
+        return () => { isMounted = false; };
+    }, [t]);
+
+    const getLocalizedValue = (value) => {
+        if (!value) return "";
+        if (typeof value === "string") return value;
+        return value[currentLanguage] || value.ar || value.en || "";
+    };
+
+    const getMainImage = (product) => {
+        if (product?.main_image) return product.main_image;
+        const images = Array.isArray(product?.images) ? product.images : [];
+        const mainImage = images.find((image) => image.is_main === true || image.is_main === 1 || image.is_main === "1") || images[0];
+        return mainImage?.image || mainImage?.image_url || mainImage?.url || mainImage?.image_path || "/images/product-placeholder.png";
+    };
+
+    const getProductName = (product) => getLocalizedValue(product?.name) || t("products.fallbackName");
+
+    const getPrice = (product) => product.has_discount && product.discount_price
+        ? product.discount_price
+        : product.price ?? product.base_price;
+
+    const handleAddToCart = (product) => {
+        window.dispatchEvent(new CustomEvent("cart:add", { detail: product }));
+    };
 
 
     return (
@@ -28,14 +66,11 @@ function BestSell() {
 
                     <div>
                         <h2 className="text-3xl font-bold text-gray-900">
-                            {t("products.title", "منتجاتنا")}
+                            {t("products.title")}
                         </h2>
 
                         <p className="mt-2 text-gray-500">
-                            {t(
-                                "products.subtitle",
-                                "اكتشف أفضل منتجاتنا"
-                            )}
+                            {t("products.subtitle")}
                         </p>
                     </div>
 
@@ -44,7 +79,7 @@ function BestSell() {
                         to="/products"
                         className="font-semibold text-primary hover:underline"
                     >
-                        {t("products.viewAll", "عرض الكل")}
+                        {t("products.viewAll")}
                     </Link>
 
                 </div>
@@ -52,9 +87,7 @@ function BestSell() {
                 {/* Loading */}
                 {loading && (
                     <div className="py-10 text-center text-gray-500">
-                        {currentLanguage === "ar"
-                            ? "جاري تحميل المنتجات..."
-                            : "Loading products..."}
+                            {t("products.loading")}
                     </div>
                 )}
 
@@ -70,9 +103,7 @@ function BestSell() {
                     !error &&
                     products.length === 0 && (
                         <div className="py-10 text-center text-gray-500">
-                            {currentLanguage === "ar"
-                                ? "لا توجد منتجات حالياً"
-                                : "No products available"}
+                            {t("products.empty")}
                         </div>
                     )}
 
@@ -81,25 +112,31 @@ function BestSell() {
                     !error &&
                     products.length > 0 && (
 
-                        <div className="grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-4">
+                        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-4 md:grid-rows-[260px_260px] lg:gap-6">
 
-                            {products.map((product) => (
+                            {products.slice(0, 5).map((product, index) => (
 
                                 <div
                                     key={product.id}
-                                    className="overflow-hidden rounded-2xl bg-white shadow-sm transition hover:shadow-lg"
+                                    className={`${index === 0 ? "sm:col-span-2 md:col-span-2 md:row-span-2" : "col-span-1 md:h-full"} group overflow-hidden rounded-2xl bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-lg`}
                                 >
 
                                     {/* الصورة الرئيسية */}
                                     <Link
                                         to={`/products/${product.id}`}
                                     >
-                                        <div className="relative aspect-square overflow-hidden bg-gray-100">
+                                        <div className={`${index === 0 ? "h-[240px] md:h-[280px]" : "h-[220px] md:h-[150px]"} relative isolate overflow-hidden bg-[#f5f1e9]`}>
 
                                             <img
                                                 src={getMainImage(product)}
+                                                alt=""
+                                                aria-hidden="true"
+                                                className="absolute inset-0 block h-full w-full scale-110 object-cover object-center opacity-25 blur-md"
+                                            />
+                                            <img
+                                                src={getMainImage(product)}
                                                 alt={getProductName(product)}
-                                                className="h-full w-full object-cover transition duration-300 hover:scale-105"
+                                                className="absolute inset-0 z-10 block h-full w-full object-contain object-center p-0"
                                                 onError={(e) => {
                                                     e.currentTarget.src =
                                                         "/images/product-placeholder.png";
@@ -109,10 +146,13 @@ function BestSell() {
                                             {/* الخصم */}
                                             {product.has_discount &&
                                                 product.discount_price && (
-                                                    <span className="absolute right-3 top-3 rounded-full bg-red-500 px-3 py-1 text-xs font-bold text-white">
-                                                        {currentLanguage === "ar"
-                                                            ? "خصم"
-                                                            : "SALE"}
+                                                    <span className="absolute right-3 top-3 rounded-full bg-[#24572b] px-3 py-1 text-xs font-bold text-white">
+                                                        {t("products.sale")}
+                                                    </span>
+                                                )}
+                                                {index === 0 && (
+                                                    <span className="absolute left-3 top-3 rounded-full bg-[#F07A26] px-3 py-1 text-xs font-bold text-white">
+                                                        {t("products.featured")}
                                                     </span>
                                                 )}
 
@@ -120,12 +160,10 @@ function BestSell() {
                                     </Link>
 
                                     {/* معلومات المنتج */}
-                                    <div className="p-4">
+                                    <div className={`${index === 0 ? "p-5 md:p-6" : "p-4"}`}>
 
-                                        <Link
-                                            to={`/products/${product.id}`}
-                                        >
-                                            <h3 className="line-clamp-2 min-h-12 font-semibold text-gray-900 hover:text-primary">
+                                        <Link to={`/products/${product.id}`}>
+                                            <h3 className={`${index === 0 ? "text-xl md:text-2xl" : "text-base"} line-clamp-2 min-h-12 font-semibold text-gray-900 hover:text-primary`}>
                                                 {getProductName(product)}
                                             </h3>
                                         </Link>
@@ -143,13 +181,11 @@ function BestSell() {
                                                     </span>
 
                                                     <span className="text-sm text-gray-400 line-through">
-                                                        {product.price}
+                                                        {product.price ?? product.base_price}
                                                     </span>
 
                                                     <span className="text-sm text-gray-500">
-                                                        {currentLanguage === "ar"
-                                                            ? "ريال"
-                                                            : "YER"}
+                                                        {t("products.currency")}
                                                     </span>
 
                                                 </div>
@@ -159,13 +195,11 @@ function BestSell() {
                                                 <div className="flex items-center gap-1">
 
                                                     <span className="text-lg font-bold text-primary">
-                                                        {product.price}
+                                                        {getPrice(product)}
                                                     </span>
 
                                                     <span className="text-sm text-gray-500">
-                                                        {currentLanguage === "ar"
-                                                            ? "ريال"
-                                                            : "YER"}
+                                                            {t("products.currency")}
                                                     </span>
 
                                                 </div>
@@ -184,17 +218,12 @@ function BestSell() {
                                                 product.stock !== undefined &&
                                                 product.stock <= 0
                                             }
-                                            className="mt-4 w-full rounded-xl bg-primary px-4 py-2.5 font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:bg-gray-300"
+                                            className="mt-4 w-full rounded-xl bg-[#F07A26] px-4 py-2.5 font-semibold text-white transition hover:bg-[#4E7A3C] disabled:cursor-not-allowed disabled:bg-gray-300"
                                         >
                                             {product.stock !== undefined &&
                                                 product.stock <= 0
-                                                ? currentLanguage === "ar"
-                                                    ? "غير متوفر"
-                                                    : "Out of stock"
-                                                : t(
-                                                    "products.addToCart",
-                                                    "أضف للسلة"
-                                                )}
+                                                ? t("products.outOfStock")
+                                                : t("products.addToCart")}
                                         </button>
 
                                     </div>
