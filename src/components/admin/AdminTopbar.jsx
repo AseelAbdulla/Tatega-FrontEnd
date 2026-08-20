@@ -4,12 +4,12 @@ const pageTitles = {
     "/admin": "لوحة التحكم الرئيسية",
     "/admin/categories": "إدارة التصنيفات",
     "/admin/products": "إدارة المنتجات",
+    "/admin/content": "إدارة المحتوى",
     "/admin/profile": "الملف الشخصي",
     "/admin/users": "المستخدمون",
     "/admin/orders": "الطلبات",
     "/admin/pos": "نقاط البيع",
     "/admin/reviews": "التقييمات",
-    "/admin/content": "إدارة المحتوى",
 };
 
 export default function AdminTopbar({ onMenuClick }) {
