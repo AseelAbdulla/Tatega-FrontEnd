@@ -6,6 +6,8 @@ import BannerCarousel from "../../components/site/BannerCarousel";
 import Reviews from "../../components/site/Reviews";
 import BestSell from "../../components/site/BestSell";
 import HomeFeatures from "../../components/site/HomeFeatures";
+import FeaturedProducts from "../../components/site/FeaturedProducts";
+
 export default function Home() {
 
   return (
@@ -14,7 +16,8 @@ export default function Home() {
 
       <BestSell />
       <HomeFeatures />
-    
+     <FeaturedProducts />
+
       {/* Store Locator */}
       <StoreLocator />
       <Reviews />
