@@ -23,9 +23,9 @@ function Banners() {
 
             const response = await bannerService.getBanners();
 
-           const data = response.data?.data ?? response.data ?? response;
+            const data = response.data?.data ?? response.data ?? response;
 
-          setBanners(data);
+            setBanners(data);
         } catch (error) {
             console.error('Failed to fetch banners:', error);
         } finally {
@@ -87,7 +87,7 @@ function Banners() {
 
             if (form.image) {
                 formData.append(
-                    'image',
+                    'image_path',
                     form.image
                 );
             }
@@ -308,10 +308,15 @@ function Banners() {
                     >
 
                         <img
-                            src={banner.image_url}
+                            src={
+                                banner.image_url
+                                    ? banner.image_url
+                                    : `http://127.0.0.1:8000/storage/${banner.image_path}`
+                            }
                             alt={banner.slogan?.ar ?? ''}
                             className="w-full h-64 object-cover"
                         />
+
 
                         <div className="p-5">
 

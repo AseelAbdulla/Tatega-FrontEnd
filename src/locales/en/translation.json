@@ -17,7 +17,9 @@
     "status": "Status",
     "available": "Available",
     "directions": "Get Directions",
-    "defaultBranch": "Tatega Branch"
+    "defaultBranch": "Tatega Branch",
+     "locateMe" :"Locate the nearest location to me",
+    "locating" :"Your location is being determined"
 },
 
   "nav": {
