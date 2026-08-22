@@ -1,9 +1,8 @@
-import React from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useNavigate } from "react-router-dom";
 
-export default function ProductCard({ product }) {
+export default function ProductCard({ product, showBestSellerBadge = false }) {
     const { i18n } = useTranslation();
     const navigate = useNavigate();
 
@@ -23,6 +22,8 @@ export default function ProductCard({ product }) {
         images[0]?.image ||
         "/images/product-placeholder.png";
 
+    const imageSrc = mainImage || "/images/product-placeholder.png";
+
     // الحصول على أقل سعر متاح (بداية السعر)
     const minPrice =
         product?.units?.length > 0
@@ -40,18 +41,24 @@ export default function ProductCard({ product }) {
                 className="relative aspect-square overflow-hidden bg-[#f3f4ed] cursor-pointer"
                 onClick={handleViewDetails}
             >
-                {mainImage ? (
-                    <img
-                        src={mainImage}
-                        alt={productName}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-300">
-                        <span className="material-symbols-outlined text-6xl">
-                            image
-                        </span>
-                    </div>
+                <img
+                    src={imageSrc}
+                    alt=""
+                    aria-hidden="true"
+                    className="absolute inset-0 block h-full w-full scale-110 object-cover object-center opacity-25 blur-md"
+                />
+                <img
+                    src={imageSrc}
+                    alt={productName}
+                    className="absolute inset-0 z-10 block h-full w-full object-contain object-center"
+                    onError={(event) => {
+                        event.currentTarget.src = "/images/product-placeholder.png";
+                    }}
+                />
+                {showBestSellerBadge && (
+                    <span className="absolute right-3 top-3 z-20 rounded-full bg-red-500 px-3 py-1 text-xs font-bold text-white">
+                        {lang === "ar" ? "الأكثر مبيعًا" : "Best Seller"}
+                    </span>
                 )}
             </div>
 

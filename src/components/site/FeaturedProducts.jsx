@@ -17,10 +17,6 @@ export default function FeaturedProducts() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
-    useEffect(() => {
-        loadProducts();
-    }, []);
-
     async function loadProducts() {
         try {
             setLoading(true);
@@ -55,8 +51,60 @@ export default function FeaturedProducts() {
         }
     }
 
-    // أول 4 منتجات فقط
-    const featuredProducts = products.slice(0, 4);
+    useEffect(() => {
+        loadProducts();
+    }, []);
+
+    const getStock = (product) => {
+        if (Array.isArray(product?.units) && product.units.length > 0) {
+            const unitsStock = product.units.reduce(
+                (total, unit) => total + Number(unit?.stock ?? unit?.unit_stock ?? 0),
+                0
+            );
+
+            return unitsStock > 0 ? unitsStock : Number(product.stock ?? 0);
+        }
+
+        return product?.stock === undefined ? null : Number(product.stock);
+    };
+
+    const isAvailable = (product) => {
+        const stock = getStock(product);
+        return stock === null || stock > 0;
+    };
+
+    const isDiscounted = (product) =>
+        Boolean(product?.has_discount && product?.discount_price);
+
+    const getSalesCount = (product) => {
+        const salesFields = [
+            "sales_count",
+            "sold_count",
+            "total_sold",
+            "units_sold",
+            "orders_count",
+            "order_items_count",
+        ];
+
+        return Math.max(
+            0,
+            ...salesFields.map((field) => Number(product?.[field] ?? 0))
+        );
+    };
+
+    const availableProducts = products.filter(isAvailable);
+    const promotedProducts = availableProducts
+        .filter((product) => isDiscounted(product) || getSalesCount(product) > 0)
+        .sort((first, second) => {
+            const discountDifference = Number(isDiscounted(second)) - Number(isDiscounted(first));
+            return discountDifference || getSalesCount(second) - getSalesCount(first);
+        });
+    const featuredProducts = [
+        ...promotedProducts,
+        ...availableProducts.filter(
+            (product) => !promotedProducts.some((promoted) => promoted.id === product.id)
+        ),
+    ].slice(0, 5);
 
     return (
         <section

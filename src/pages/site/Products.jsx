@@ -20,10 +20,6 @@ export default function Products() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
-    useEffect(() => {
-        loadData();
-    }, []);
-
     async function loadData() {
         try {
             setLoading(true);
@@ -59,14 +55,27 @@ export default function Products() {
         }
     }
 
-    const filteredProducts = useMemo(() => {
-        if (!selectedCategory) {
-            return products;
-        }
+    useEffect(() => {
+        loadData();
+    }, []);
 
-        return products.filter(
-            (product) => product.category?.id === selectedCategory
-        );
+    const filteredProducts = useMemo(() => {
+        const categoryProducts = selectedCategory
+            ? products.filter((product) => product.category?.id === selectedCategory)
+            : products;
+
+        return categoryProducts.filter((product) => {
+            if (!Array.isArray(product.units) || product.units.length === 0) {
+                return product.stock === undefined || Number(product.stock) > 0;
+            }
+
+            const unitsStock = product.units.reduce(
+                (total, unit) => total + Number(unit?.stock ?? unit?.unit_stock ?? 0),
+                0
+            );
+
+            return unitsStock > 0 || (unitsStock === 0 && Number(product.stock ?? 0) > 0);
+        });
     }, [products, selectedCategory]);
 
     function getCategoryName(category) {
@@ -182,10 +191,11 @@ export default function Products() {
             {/* Products Grid */}
             {!loading && !error && filteredProducts.length > 0 && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {filteredProducts.map((product) => (
+                    {filteredProducts.map((product, index) => (
                         <ProductCard
                             key={product.id}
                             product={product}
+                            showBestSellerBadge={index === 0}
                         />
                     ))}
                 </div>

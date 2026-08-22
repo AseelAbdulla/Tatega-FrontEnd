@@ -124,7 +124,12 @@ export default function ProductDetails() {
     const unitsList = product?.units || product?.product_units || [];
 
     const getProductName = () => getLocalizedValue(product?.name);
-    const getProductDescription = () => getLocalizedValue(product?.description);
+    const getProductDescription = () => getLocalizedValue(
+        product?.description || {
+            ar: product?.description_ar || product?.descriptionAr,
+            en: product?.description_en || product?.descriptionEn,
+        }
+    );
 
     const getActivePrice = () => {
         if (unitsList.length > 0 && selectedUnitId) {

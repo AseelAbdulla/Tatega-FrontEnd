@@ -25,8 +25,8 @@ const isPersistedId = (id) => {
 };
 
 export default function Products() {
-    const { t, i18n } = useTranslation();
-    const language = i18n.resolvedLanguage?.startsWith("en") ? "en" : "ar";
+    const { t } = useTranslation(undefined, { lng: "ar" });
+    const language = "ar";
     const isAdmin = (() => {
         const token = localStorage.getItem("token") || localStorage.getItem("access_token");
         if (!token) return false;
@@ -985,8 +985,9 @@ export default function Products() {
                     const isLowStock = !isOutOfStock && Number(totalStock) < Number(product.low_stock_threshold ?? 5);
                     return (
                         <div className={`product-card ${isLowStock || isOutOfStock ? "low-stock" : ""}`} key={product.id}>
-                            <div className="product-image-wrapper">
+                            <div className={`product-image-wrapper ${isOutOfStock ? "out-of-stock" : ""}`}>
                                 {image ? <img src={image} alt={product.name?.ar || "Product"} onError={(e) => { e.currentTarget.style.display = "none"; }} /> : <div className="product-no-image"><span className="material-symbols-outlined">inventory_2</span></div>}
+                                {isOutOfStock && <div className="product-out-of-stock-overlay" aria-hidden="true" />}
                                 <span className="product-category-badge">{getCategoryName(product)}</span>
                                 {(isLowStock || isOutOfStock) && <span className={`product-low-stock-badge ${isOutOfStock ? "out-of-stock" : ""}`}><span className="material-symbols-outlined">{isOutOfStock ? "block" : "warning"}</span> {isOutOfStock ? t("adminProducts.outOfStock") : t("adminProducts.lowStock")}</span>}
                                 <div className="product-actions">
