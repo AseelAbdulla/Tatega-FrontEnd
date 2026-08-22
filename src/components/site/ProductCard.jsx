@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 
 import { useNavigate } from "react-router-dom";
 
-export default function ProductCard({ product, showBestSellerBadge = false }) {
+export default function ProductCard({ product }) {
     const { i18n } = useTranslation();
     const navigate = useNavigate();
 
@@ -24,6 +24,19 @@ export default function ProductCard({ product, showBestSellerBadge = false }) {
 
     const imageSrc = mainImage || "/images/product-placeholder.png";
 
+    const stock = Array.isArray(product?.units) && product.units.length > 0
+        ? (() => {
+            const unitsStock = product.units.reduce(
+                (total, unit) => total + Number(unit?.stock ?? unit?.unit_stock ?? 0),
+                0
+            );
+            return unitsStock > 0 ? unitsStock : Number(product.stock ?? 0);
+        })()
+        : product?.stock === undefined
+            ? null
+            : Number(product.stock);
+    const isOutOfStock = stock !== null && stock <= 0;
+
     // الحصول على أقل سعر متاح (بداية السعر)
     const minPrice =
         product?.units?.length > 0
@@ -31,6 +44,10 @@ export default function ProductCard({ product, showBestSellerBadge = false }) {
             : product?.price;
 
     const handleViewDetails = () => {
+        if (isOutOfStock) {
+            return;
+        }
+
         navigate(`/products/${product.id}`);
     };
 
@@ -38,7 +55,11 @@ export default function ProductCard({ product, showBestSellerBadge = false }) {
         <div className="group bg-white rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col h-full">
             {/* الصورة - عند الضغط عليها تذهب للتفاصيل */}
             <div
-                className="relative aspect-square overflow-hidden bg-[#f3f4ed] cursor-pointer"
+                className={`relative aspect-square overflow-hidden bg-[#f3f4ed] ${
+                    !isOutOfStock ? "cursor-pointer" : "cursor-not-allowed"
+                } ${
+                    isOutOfStock ? "after:absolute after:inset-0 after:z-15 after:bg-white/60" : ""
+                }`}
                 onClick={handleViewDetails}
             >
                 <img
@@ -55,9 +76,9 @@ export default function ProductCard({ product, showBestSellerBadge = false }) {
                         event.currentTarget.src = "/images/product-placeholder.png";
                     }}
                 />
-                {showBestSellerBadge && (
-                    <span className="absolute right-3 top-3 z-20 rounded-full bg-red-500 px-3 py-1 text-xs font-bold text-white">
-                        {lang === "ar" ? "الأكثر مبيعًا" : "Best Seller"}
+                {isOutOfStock && (
+                    <span className="absolute inset-0 z-20 flex items-center justify-center text-center text-lg font-bold text-gray-700">
+                        {lang === "ar" ? "نفد المخزون" : "Out of stock"}
                     </span>
                 )}
             </div>
@@ -66,7 +87,9 @@ export default function ProductCard({ product, showBestSellerBadge = false }) {
             <div className="p-5 flex flex-col flex-1">
                 <h3
                     onClick={handleViewDetails}
-                    className="font-bold text-base text-[#2A2A2A] mb-2 cursor-pointer hover:text-[#24572b] transition-colors"
+                    className={`font-bold text-base text-[#2A2A2A] mb-2 transition-colors ${
+                        !isOutOfStock ? "cursor-pointer hover:text-[#24572b]" : "cursor-not-allowed"
+                    }`}
                 >
                     {productName}
                 </h3>
@@ -94,12 +117,19 @@ export default function ProductCard({ product, showBestSellerBadge = false }) {
                     {/* زر عرض التفاصيل */}
                     <button
                         onClick={handleViewDetails}
-                        className="w-full py-3 bg-[#4E7A3C] hover:bg-[#24572b] text-white rounded-xl font-bold flex items-center justify-center gap-2 active:scale-95 transition-all"
+                        disabled={isOutOfStock}
+                        className={`w-full py-3 text-white rounded-xl font-bold flex items-center justify-center gap-2 active:scale-95 transition-all ${
+                            isOutOfStock
+                                ? "bg-gray-400 hover:bg-gray-500"
+                                : "bg-[#4E7A3C] hover:bg-[#24572b]"
+                        }`}
                     >
                         <span className="material-symbols-outlined text-[18px]">
-                            visibility
+                            {isOutOfStock ? "block" : "visibility"}
                         </span>
-                        {lang === "ar" ? "عرض التفاصيل" : "View Details"}
+                        {isOutOfStock
+                            ? (lang === "ar" ? "نفد المخزون" : "Out of stock")
+                            : (lang === "ar" ? "عرض التفاصيل" : "View Details")}
                     </button>
                 </div>
             </div>
