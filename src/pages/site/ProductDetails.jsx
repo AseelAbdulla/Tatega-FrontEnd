@@ -42,22 +42,40 @@ export default function ProductDetails() {
 
         let parsed = data;
 
-        // 1. إذا كانت القيمة قادمة كـ JSON String قم بفكها أولاً
         if (typeof data === "string") {
             try {
                 parsed = JSON.parse(data);
             } catch {
-                // إذا لم تكن JSON وتصادفت كـ String عادي، أرجعها كما هي
                 return data;
             }
         }
 
-        // 2. إذا كانت Object يحتوي على مفاتيح اللغة (ar, en)
         if (typeof parsed === "object" && parsed !== null) {
             return parsed[currentLanguage] || parsed.ar || parsed.en || "";
         }
 
         return String(parsed);
+    };
+
+    const getUnitDisplayName = (unit) => {
+        if (!unit) return "";
+
+        const unitName = unit.unit_name ?? unit.name ?? unit.unitName ?? null;
+        const directName = unit.unit_name_ar ?? unit.unit_name_en ?? unit.name_ar ?? unit.name_en ?? unit.nameAr ?? unit.nameEn ?? "";
+
+        if (unitName && typeof unitName === "object") {
+            return getLocalizedValue(unitName);
+        }
+
+        if (typeof unitName === "string") {
+            return getLocalizedValue(unitName);
+        }
+
+        if (typeof directName === "string") {
+            return directName;
+        }
+
+        return "";
     };
 
     useEffect(() => {
@@ -244,7 +262,7 @@ export default function ProductDetails() {
                                 >
                                     {unitsList.map((unit) => (
                                         <option key={unit.id} value={unit.id}>
-                                            {getLocalizedValue(unit.unit_name)} - {Number(unit.price).toFixed(2)}
+                                            {getUnitDisplayName(unit)} - {Number(unit.price ?? 0).toFixed(2)}
                                         </option>
                                     ))}
                                 </select>

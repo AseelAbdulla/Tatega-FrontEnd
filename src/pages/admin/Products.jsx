@@ -27,6 +27,18 @@ const isPersistedId = (id) => {
 export default function Products() {
     const { t, i18n } = useTranslation();
     const language = i18n.resolvedLanguage?.startsWith("en") ? "en" : "ar";
+    const isAdmin = (() => {
+        const token = localStorage.getItem("token") || localStorage.getItem("access_token");
+        if (!token) return false;
+        const role = localStorage.getItem("role");
+        if (role === "admin") return true;
+        try {
+            const user = JSON.parse(localStorage.getItem("user") || "null");
+            return user?.role === "admin" || user?.roles?.some((item) => (item?.name || item) === "admin");
+        } catch {
+            return false;
+        }
+    })();
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
     const [search, setSearch] = useState("");
@@ -41,6 +53,7 @@ export default function Products() {
     const [showEditModal, setShowEditModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState(null);
+    const [viewLoading, setViewLoading] = useState(false);
 
     const emptyForm = {
         category_id: "",
@@ -120,6 +133,24 @@ export default function Products() {
         return total > 0 ? total : Number(product?.stock ?? 0);
     };
 
+    const normalizeUnit = (unit) => {
+        if (!unit) return null;
+
+        const unitName = unit.unit_name ?? unit.name ?? unit.unitName ?? {
+            ar: unit.unit_name_ar ?? unit.name_ar ?? unit.nameAr ?? "",
+            en: unit.unit_name_en ?? unit.name_en ?? unit.nameEn ?? "",
+        };
+
+        return {
+            ...unit,
+            unit_name: unitName,
+            nameAr: unit.nameAr ?? unit.name_ar ?? unit.unit_name_ar ?? (typeof unitName === "object" ? unitName.ar : ""),
+            nameEn: unit.nameEn ?? unit.name_en ?? unit.unit_name_en ?? (typeof unitName === "object" ? unitName.en : ""),
+            price: unit.price ?? unit.unit_price ?? 0,
+            stock: unit.stock ?? unit.unit_stock ?? 0,
+        };
+    };
+
     const normalizeProduct = (product) => {
         if (!product) return null;
 
@@ -132,6 +163,18 @@ export default function Products() {
         if (typeof description === "string") {
             try { description = JSON.parse(description); } catch { description = { ar: description, en: "" }; }
         }
+        if (!description || (typeof description === "object" && !description.ar && !description.en)) {
+            description = {
+                ar: product.description_ar ?? product.descriptionAr ?? "",
+                en: product.description_en ?? product.descriptionEn ?? "",
+            };
+        }
+
+        const normalizedUnits = Array.isArray(product.units)
+            ? product.units.map(normalizeUnit).filter(Boolean)
+            : Array.isArray(product.product_units)
+                ? product.product_units.map(normalizeUnit).filter(Boolean)
+                : [];
 
         return {
             ...product,
@@ -139,7 +182,7 @@ export default function Products() {
             name: name || { ar: "", en: "" },
             description: description || { ar: "", en: "" },
             images: product.images || product.product_images || [],
-            units: product.units || product.product_units || [],
+            units: normalizedUnits,
             base_price: product.base_price ?? product.price ?? 0,
             discount_price: product.discount_price ?? product.discount ?? null,
             has_discount: Boolean(product.has_discount),
@@ -198,8 +241,49 @@ export default function Products() {
 
     const getLocalizedValue = (value) => {
         if (!value) return "";
-        if (typeof value === "string") return value;
-        return value[language] || value.ar || value.en || "";
+        if (typeof value === "string") {
+            try {
+                const parsed = JSON.parse(value);
+                if (parsed && typeof parsed === "object") {
+                    return parsed[language] || parsed.ar || parsed.en || "";
+                }
+                return parsed || value;
+            } catch {
+                return value;
+            }
+        }
+        if (typeof value === "object") {
+            return value[language] || value.ar || value.en || "";
+        }
+        return String(value);
+    };
+
+    const getUnitDisplayName = (unit) => {
+        if (!unit) return "";
+
+        const unitName = unit.unit_name ?? unit.name ?? unit.unitName ?? null;
+        const directName =
+            unit.unit_name_ar ??
+            unit.unit_name_en ??
+            unit.name_ar ??
+            unit.name_en ??
+            unit.nameAr ??
+            unit.nameEn ??
+            "";
+
+        if (unitName && typeof unitName === "object") {
+            return getLocalizedValue(unitName);
+        }
+
+        if (typeof unitName === "string") {
+            return getLocalizedValue(unitName);
+        }
+
+        if (typeof directName === "string") {
+            return directName;
+        }
+
+        return "";
     };
 
     const filteredProducts = products.filter((product) => {
@@ -207,9 +291,12 @@ export default function Products() {
         const values = [
             product.name?.ar,
             product.name?.en,
+            product.description?.ar,
+            product.description?.en,
             product.sku,
             product.category?.name?.ar,
             product.category?.name?.en,
+            ...(product.units || []).flatMap((unit) => [unit.nameAr, unit.nameEn, getUnitDisplayName(unit)]),
         ].map((v) => String(v || "").toLowerCase());
 
         const matchesSearch = values.some((v) => v.includes(searchValue));
@@ -281,6 +368,10 @@ export default function Products() {
         fd.append("name_en", form.nameEn.trim());
         fd.append("description_ar", form.descriptionAr.trim());
         fd.append("description_en", form.descriptionEn.trim());
+        fd.append("description", JSON.stringify({
+            ar: form.descriptionAr.trim(),
+            en: form.descriptionEn.trim(),
+        }));
         fd.append("sku", form.sku.trim());
         fd.append("base_price", form.base_price);
         fd.append("has_discount", form.has_discount ? "1" : "0");
@@ -351,9 +442,27 @@ export default function Products() {
         }
     };
 
-    const openViewModal = (product) => {
+    const openViewModal = async (product) => {
         setSelectedProduct(product);
         setShowViewModal(true);
+        setViewLoading(true);
+
+        try {
+            const response = await fetch(`${API_URL}/products/${product.id}`, {
+                method: "GET",
+                headers: getHeaders(),
+            });
+            const result = await parseResponse(response);
+            if (!response.ok) throw new Error(getApiError(result));
+
+            const detailedProduct = normalizeProduct(result.data || result);
+            setSelectedProduct(detailedProduct);
+        } catch (err) {
+            console.error("Load product view details error:", err);
+            setError(getFriendlyError(err, t("adminProducts.errors.load")));
+        } finally {
+            setViewLoading(false);
+        }
     };
 
     const openEditModal = async (product) => {
@@ -665,6 +774,7 @@ export default function Products() {
     const closeViewModal = () => {
         setShowViewModal(false);
         setSelectedProduct(null);
+        setViewLoading(false);
     };
 
     const closeDeleteModal = () => {
@@ -849,7 +959,7 @@ export default function Products() {
         <div className="products-page">
             <div className="products-heading">
                 <div><h1>{t("adminProducts.title")}</h1><p>{t("adminProducts.subtitle")}</p></div>
-                <button type="button" className="product-add-button" onClick={openAddModal}><span className="material-symbols-outlined">add</span> {t("adminProducts.addProduct")}</button>
+                {isAdmin && <button type="button" className="product-add-button" onClick={openAddModal}><span className="material-symbols-outlined">add</span> {t("adminProducts.addProduct")}</button>}
             </div>
 
             {!showAddModal && !showEditModal && !showDeleteModal && error && <div className="product-error">{error}</div>}
@@ -871,22 +981,37 @@ export default function Products() {
                     const image = getProductImage(product);
                     const price = getDisplayPrice(product);
                     const totalStock = getUnitsTotalStock(product);
-                    const isLowStock = Number(totalStock) <= Number(product.low_stock_threshold ?? 5);
+                    const isOutOfStock = Number(totalStock) === 0;
+                    const isLowStock = !isOutOfStock && Number(totalStock) < Number(product.low_stock_threshold ?? 5);
                     return (
-                        <div className={`product-card ${isLowStock ? "low-stock" : ""}`} key={product.id}>
+                        <div className={`product-card ${isLowStock || isOutOfStock ? "low-stock" : ""}`} key={product.id}>
                             <div className="product-image-wrapper">
                                 {image ? <img src={image} alt={product.name?.ar || "Product"} onError={(e) => { e.currentTarget.style.display = "none"; }} /> : <div className="product-no-image"><span className="material-symbols-outlined">inventory_2</span></div>}
                                 <span className="product-category-badge">{getCategoryName(product)}</span>
-                                {isLowStock && <span className="product-low-stock-badge"><span className="material-symbols-outlined">warning</span> {t("adminProducts.lowStock")}</span>}
+                                {(isLowStock || isOutOfStock) && <span className={`product-low-stock-badge ${isOutOfStock ? "out-of-stock" : ""}`}><span className="material-symbols-outlined">{isOutOfStock ? "block" : "warning"}</span> {isOutOfStock ? t("adminProducts.outOfStock") : t("adminProducts.lowStock")}</span>}
                                 <div className="product-actions">
                                     <button type="button" title={t("adminProducts.view")} onClick={() => openViewModal(product)}><span className="material-symbols-outlined">visibility</span></button>
-                                    <button type="button" title={t("adminProducts.edit")} onClick={() => openEditModal(product)}><span className="material-symbols-outlined">edit</span></button>
-                                    <button type="button" title={t("adminProducts.delete")} onClick={() => openDeleteModal(product)}><span className="material-symbols-outlined">delete</span></button>
+                                    {isAdmin && <>
+                                        <button type="button" title={t("adminProducts.edit")} onClick={() => openEditModal(product)}><span className="material-symbols-outlined">edit</span></button>
+                                        <button type="button" title={t("adminProducts.delete")} onClick={() => openDeleteModal(product)}><span className="material-symbols-outlined">delete</span></button>
+                                    </>}
                                 </div>
                             </div>
                             <div className="product-card-body">
                                 <h3>{getLocalizedValue(product.name)}</h3>
                                 <small>{getLocalizedValue(product.name?.[language === "ar" ? "en" : "ar"])}</small>
+                                {getLocalizedValue(product.description) && <p className="product-description">
+                                    {getLocalizedValue(product.description)}
+                                </p>}
+                                {product.units?.length > 0 && <div className="product-units-preview">
+                                    <span className="product-units-label">{t("adminProducts.units")}</span>
+                                    {product.units.map((unit) => (
+                                        <span className="product-unit-chip" key={unit.id}>
+                                            <span>{getUnitDisplayName(unit)}</span>
+                                            <strong>{unit.price}</strong>
+                                        </span>
+                                    ))}
+                                </div>}
                                 <div className="product-price-row">
                                     <div><span className="product-price">{price}</span>{product.has_discount && product.discount_price && <span className="product-old-price">{product.base_price}</span>}</div>
                                     <div className="product-stock"><span>{t("adminProducts.stock")}</span><strong className={isLowStock ? "danger" : ""}>{totalStock}</strong></div>
@@ -897,10 +1022,10 @@ export default function Products() {
                     );
                 }) : <div className="products-empty">{t("adminProducts.empty")}</div>}
 
-                <button type="button" className="product-add-card" onClick={openAddModal}>
+                {isAdmin && <button type="button" className="product-add-card" onClick={openAddModal}>
                     <div><span className="material-symbols-outlined">add</span></div>
                     <strong>{t("adminProducts.addProductCard")}</strong><span>{t("adminProducts.expandCollection")}</span>
-                </button>
+                </button>}
             </div>
 
             {(showAddModal || showEditModal) && (
@@ -940,6 +1065,7 @@ export default function Products() {
                 <div className="product-modal-overlay" onClick={closeViewModal}>
                     <div className="product-modal" onClick={(e) => e.stopPropagation()}>
                         <div className="product-modal-header"><h3>{t("adminProducts.details")}</h3><button type="button" onClick={closeViewModal}><span className="material-symbols-outlined">close</span></button></div>
+                        {viewLoading ? <div className="products-empty">{t("adminProducts.loading")}</div> : <>
                         <div className="product-details">
                             <div><strong>{t("adminProducts.name")}</strong><span>{getLocalizedValue(selectedProduct.name)}</span></div>
                             <div><strong>{t("adminProducts.englishName")}</strong><span>{getLocalizedValue(selectedProduct.name?.[language === "ar" ? "en" : "ar"])}</span></div>
@@ -961,8 +1087,9 @@ export default function Products() {
 
                         <div className="view-units">
                             <h4>{t("adminProducts.units")}</h4>
-                            {selectedProduct.units?.length ? selectedProduct.units.map((unit) => <div className="view-unit" key={unit.id}><span>{getLocalizedValue(unit.unit_name)}</span><strong>{unit.price}</strong><small>{t("adminProducts.unitStockLabel", { stock: unit.stock })}</small></div>) : <p>{t("adminProducts.noUnits")}</p>}
+                            {selectedProduct.units?.length ? selectedProduct.units.map((unit) => <div className="view-unit" key={unit.id}><span>{getUnitDisplayName(unit)}</span><strong>{unit.price}</strong><small>{t("adminProducts.unitStockLabel", { stock: unit.stock })}</small></div>) : <p>{t("adminProducts.noUnits")}</p>}
                         </div>
+                        </>}
                     </div>
                 </div>
             )}

@@ -1,17 +1,4 @@
-const products = [
-    {
-        name: "سلة صوف يدوية",
-        quantity: 2,
-        image: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&q=80&w=200",
-    },
-    {
-        name: "منتج عضوي",
-        quantity: 3,
-        image: "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&q=80&w=200",
-    },
-];
-
-export default function StockAlerts() {
+export default function StockAlerts({ products = [] }) {
     return (
         <section className="dashboard-card stock-card">
 
@@ -28,17 +15,13 @@ export default function StockAlerts() {
             </div>
 
             <div className="stock-list">
-
-                {products.map((product) => (
+                {products.length === 0 ? <p className="muted">لا توجد منتجات قاربت على النفاد</p> : products.map((product) => (
                     <div
                         className="stock-item"
-                        key={product.name}
+                        key={product.id}
                     >
 
-                        <img
-                            src={product.image}
-                            alt={product.name}
-                        />
+                        {product.image ? <img src={product.image} alt={product.name} /> : <span className="material-symbols-outlined">inventory_2</span>}
 
                         <div>
                             <strong>
@@ -46,7 +29,7 @@ export default function StockAlerts() {
                             </strong>
 
                             <span>
-                                المتبقي: {product.quantity} فقط
+                                {product.quantity === 0 ? "نفد تماماً" : `منخفض: المتبقي ${product.quantity}`}
                             </span>
                         </div>
 
