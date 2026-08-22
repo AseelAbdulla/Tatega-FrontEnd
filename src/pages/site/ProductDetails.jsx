@@ -123,6 +123,19 @@ export default function ProductDetails() {
     // 🟢 تعريف متغير unitsList هنا لمنع خطأ ReferenceError
     const unitsList = product?.units || product?.product_units || [];
 
+    const productStock = unitsList.length > 0
+        ? (() => {
+            const unitsStock = unitsList.reduce(
+                (total, unit) => total + Number(unit?.stock ?? unit?.unit_stock ?? 0),
+                0
+            );
+            return unitsStock > 0 ? unitsStock : Number(product?.stock ?? 0);
+        })()
+        : product?.stock === undefined
+            ? null
+            : Number(product.stock);
+    const isOutOfStock = productStock !== null && productStock <= 0;
+
     const getProductName = () => getLocalizedValue(product?.name);
     const getProductDescription = () => getLocalizedValue(
         product?.description || {
@@ -147,6 +160,10 @@ export default function ProductDetails() {
     const productImages = getProductImages(product);
 
     const handleAddToCart = async () => {
+        if (isOutOfStock) {
+            return;
+        }
+
         const token = localStorage.getItem("token");
 
         if (!token) {
@@ -314,13 +331,15 @@ export default function ProductDetails() {
                         {/* Add Button */}
                         <button
                             type="button"
-                            disabled={addingToCart || (unitsList.length > 0 && !selectedUnitId)}
+                            disabled={isOutOfStock || addingToCart || (unitsList.length > 0 && !selectedUnitId)}
                             onClick={handleAddToCart}
-                            className="mt-8 w-full rounded-xl bg-[#F07A26] py-4 text-white font-bold hover:bg-[#4E7A3C] transition disabled:bg-gray-300"
+                            className="mt-8 w-full rounded-xl bg-[#F07A26] py-4 text-white font-bold hover:bg-[#4E7A3C] transition disabled:cursor-not-allowed disabled:bg-gray-300"
                         >
-                            {addingToCart
-                                ? currentLanguage === "ar" ? "جاري الإضافة..." : "Adding..."
-                                : currentLanguage === "ar" ? "أضف إلى السلة" : "Add to Cart"}
+                            {isOutOfStock
+                                ? currentLanguage === "ar" ? "نفد المخزون" : "Out of stock"
+                                : addingToCart
+                                    ? currentLanguage === "ar" ? "جاري الإضافة..." : "Adding..."
+                                    : currentLanguage === "ar" ? "أضف إلى السلة" : "Add to Cart"}
                         </button>
                     </div>
                 </div>
