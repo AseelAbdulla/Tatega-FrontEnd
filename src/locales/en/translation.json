@@ -90,6 +90,7 @@
   "loading": "Loading products...",
   "empty": "No products found",
   "lowStock": "Low",
+  "outOfStock": "Out of stock",
   "stock": "Stock",
   "sku": "SKU",
   "view": "View",

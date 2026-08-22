@@ -25,6 +25,18 @@ export default function Categories() {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
 
     const [selectedCategory, setSelectedCategory] = useState(null);
+    const isAdmin = (() => {
+        const token = localStorage.getItem("token") || localStorage.getItem("access_token");
+        if (!token) return false;
+        const role = localStorage.getItem("role");
+        if (role === "admin") return true;
+        try {
+            const user = JSON.parse(localStorage.getItem("user") || "null");
+            return user?.role === "admin" || user?.roles?.some((item) => (item?.name || item) === "admin");
+        } catch {
+            return false;
+        }
+    })();
 
     const [form, setForm] = useState({
         nameAr: "",
@@ -37,7 +49,7 @@ export default function Categories() {
     ===================================================== */
 
     const getToken = () => {
-        return localStorage.getItem("token");
+        return localStorage.getItem("token") || localStorage.getItem("access_token");
     };
 
     /* =====================================================
@@ -953,7 +965,7 @@ export default function Categories() {
 
                 </div>
 
-                <button
+                {isAdmin && <button
                     type="button"
                     className="category-add-button"
                     onClick={openAddModal}
@@ -965,7 +977,7 @@ export default function Categories() {
 
                     إضافة تصنيف جديد
 
-                </button>
+                </button>}
 
             </div>
 
@@ -1177,6 +1189,7 @@ export default function Categories() {
 
                                                 <div className="category-actions">
 
+                                                    {isAdmin && <>
                                                     <button
                                                         type="button"
                                                         className="category-edit-button"
@@ -1210,6 +1223,7 @@ export default function Categories() {
                                                         </span>
 
                                                     </button>
+                                                    </>}
 
                                                 </div>
 

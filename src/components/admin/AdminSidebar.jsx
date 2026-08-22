@@ -36,6 +36,11 @@ export default function AdminSidebar({ isOpen, onClose, isCollapsed, onToggleCol
 
     const handleLogout = () => {
         localStorage.removeItem("token");
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("token_type");
+        localStorage.removeItem("user");
+        localStorage.removeItem("role");
+        localStorage.removeItem("permissions");
         localStorage.removeItem("isLoggedIn");
         sessionStorage.clear();
         window.location.href = "/login";

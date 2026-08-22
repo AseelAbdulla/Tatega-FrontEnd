@@ -1969,6 +1969,11 @@ label {
     font-weight: 700;
 }
 
+.product-low-stock-badge.out-of-stock {
+    background: rgba(255, 218, 214, 0.98);
+    color: #ba1a1a;
+}
+
 .product-low-stock-badge .material-symbols-outlined {
     font-size: 14px;
 }
@@ -2026,6 +2031,63 @@ label {
 .product-card-body small {
     color: #554336;
     font-size: 12px;
+}
+
+.product-description {
+    display: -webkit-box;
+    min-height: 42px;
+    margin: 0;
+    overflow: hidden;
+    color: #554336;
+    font-size: 12px;
+    line-height: 1.75;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+}
+
+.product-units-preview {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    min-height: 30px;
+}
+
+.product-units-label {
+    width: 100%;
+    color: #2b6954;
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.product-unit-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    max-width: 100%;
+    padding: 5px 8px;
+    border: 1px solid rgba(43, 105, 84, 0.16);
+    border-radius: 8px;
+    background: #e6f4ec;
+    color: #2b6954;
+    font-size: 11px;
+}
+
+.product-unit-chip span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.product-unit-chip strong {
+    color: #8d4b00;
+    font-size: 11px;
+    white-space: nowrap;
+}
+
+.product-no-units {
+    color: #8a8a8a;
+    font-size: 11px;
 }
 
 .product-price-row {
