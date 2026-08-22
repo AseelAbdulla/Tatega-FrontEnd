@@ -3,6 +3,69 @@ import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { getProducts } from "../../services/productService";
 
+const getProductStock = (product) => {
+    if (Array.isArray(product?.units) && product.units.length > 0) {
+        const unitsStock = product.units.reduce(
+            (total, unit) => total + Number(unit?.stock ?? unit?.unit_stock ?? 0),
+            0
+        );
+
+        return unitsStock > 0 ? unitsStock : Number(product.stock ?? 0);
+    }
+
+    return product?.stock === undefined ? null : Number(product.stock);
+};
+
+const isAvailable = (product) => {
+    const stock = getProductStock(product);
+    return stock === null || stock > 0;
+};
+
+const isDiscounted = (product) =>
+    Boolean(product?.has_discount && product?.discount_price);
+
+const getSalesCount = (product) => {
+    const salesFields = [
+        "sales_count",
+        "sold_count",
+        "total_sold",
+        "units_sold",
+        "orders_count",
+        "order_items_count",
+    ];
+
+    return Math.max(
+        0,
+        ...salesFields.map((field) => Number(product?.[field] ?? 0))
+    );
+};
+
+const isBestSeller = (product) =>
+    Boolean(
+        product?.is_best_seller ||
+        product?.is_bestseller ||
+        product?.is_best_selling ||
+        product?.best_seller ||
+        product?.featured
+    );
+
+const selectHomepageProducts = (products) => {
+    const availableProducts = products.filter(isAvailable);
+    const promotedProducts = availableProducts
+        .filter((product) => isDiscounted(product) || isBestSeller(product) || getSalesCount(product) > 0)
+        .sort((first, second) => {
+            const discountDifference = Number(isDiscounted(second)) - Number(isDiscounted(first));
+            return discountDifference || getSalesCount(second) - getSalesCount(first);
+        });
+
+    return [
+        ...promotedProducts,
+        ...availableProducts.filter(
+            (product) => !promotedProducts.some((promoted) => promoted.id === product.id)
+        ),
+    ].slice(0, 5);
+};
+
 function BestSell() {
     // استخراج دالة الترجمة t واللغة الحالية
     const { t, i18n } = useTranslation();
@@ -19,7 +82,7 @@ function BestSell() {
                 setLoading(true);
                 setError("");
                 const result = await getProducts();
-                if (isMounted) setProducts(Array.isArray(result) ? result.slice(0, 8) : []);
+                if (isMounted) setProducts(Array.isArray(result) ? selectHomepageProducts(result) : []);
             } catch (requestError) {
                 console.error("Products Error:", requestError);
                 if (isMounted) setError(t("products.errors.load"));
@@ -114,7 +177,7 @@ function BestSell() {
 
                         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-4 md:grid-rows-[260px_260px] lg:gap-6">
 
-                            {products.slice(0, 5).map((product, index) => (
+                            {products.map((product, index) => (
 
                                 <div
                                     key={product.id}
@@ -150,12 +213,6 @@ function BestSell() {
                                                         {t("products.sale")}
                                                     </span>
                                                 )}
-                                                {index === 0 && (
-                                                    <span className="absolute left-3 top-3 rounded-full bg-[#F07A26] px-3 py-1 text-xs font-bold text-white">
-                                                        {t("products.featured")}
-                                                    </span>
-                                                )}
-
                                         </div>
                                     </Link>
 
